@@ -4,73 +4,50 @@
 
   "hero": {
     "eyebrow": "Lekkala Jeyavardhan  ·  field notes",
-    "title": "I build things to *see* how they work.",
+    "title_lines": ["I build things", "to *see* how they work."],
     "lede": "Shells, flight computers, robots, and the guides that explain them.",
-    "image": "tower.jpg"
+    "prompt": "$ now building ",
+    "typing": ["a Unix shell in C", "a rocket that steers itself", "a flight telemetry dashboard", "a robot that plays soccer"],
+    "stickers": [
+      { "image": "harbour.jpg", "motion": [["water", [0, 0.66, 1, 1]], ["drift", [0.62, 0.02, 0.98, 0.46]], ["leaves", [0, 0, 0.36, 0.4]]] },
+      { "image": "tram.png",    "motion": [["water", [0, 0.38, 0.47, 0.64]], ["water", [0.47, 0.38, 1, 0.47]], ["drift", [0.25, 0, 0.85, 0.4]], ["leaves", [0, 0.82, 1, 1]]] }
+    ]
   },
-
-  "about": [
-    {
-      "q": "Who are you?",
-      "a": "A builder from India who likes to understand what happens underneath. I write C when I want to see the machine, and I wire up sensors when I want to see the physics."
-    },
-    {
-      "q": "What are you working on?",
-      "a": "ForgeShell, a Unix shell with a field guide that explains every line, and a rocket that steers by tilting its motor."
-    }
-  ],
 
   "projects": [
     {
       "name": "ForgeShell",
       "repo": "ForgeShell",
-      "status": "active",
-      "blurb": "A resource-aware Unix shell in C: pipelines, job control and live /proc process monitoring.",
-      "tags": [["C", "blue"], ["POSIX", "sea"], ["Linux", "roof"]],
-      "art": "shell",
-      "art_text": "$ ls | grep .c | wc -l",
-      "art_out": "→ 14"
+      "blurb": "A resource-aware Unix shell in C: pipelines, job control, live /proc monitoring.",
+      "tags": [["C", "blue"], ["Linux", "sea"]]
     },
     {
       "name": "TVC Rocket",
       "repo": "Single-Thrust-Vector-Controlled-Rocket",
-      "status": "building",
-      "blurb": "A rocket that steers by tilting its single motor, with a control loop holding it upright.",
-      "tags": [["Control", "grass"], ["Embedded", "sea"], ["JavaScript", "blue"]],
-      "art": "rocket",
-      "art_text": "Gimbal ±8°"
+      "blurb": "A rocket that steers by tilting its single motor.",
+      "tags": [["Control", "grass"], ["Embedded", "sea"]]
     },
     {
       "name": "Flight Telemetry",
       "repo": "STM32-Flight_Telemetry",
-      "status": "built",
-      "blurb": "A 3D flight telemetry dashboard fed by STM32 sensor fusion over Web Serial.",
-      "tags": [["STM32", "sea"], ["Sensors", "grass"], ["WebGL", "blue"]],
-      "art": "telemetry",
-      "art_text": "STM32 → Web Serial"
+      "blurb": "3D flight telemetry from STM32 sensor fusion over Web Serial.",
+      "tags": [["STM32", "sea"], ["WebGL", "blue"]]
     },
     {
       "name": "Robo Soccerbot",
       "repo": "Robo_Soccerbot",
-      "status": "documented",
-      "blurb": "A four-wheel robot soccer bot built from scratch, with the whole journey written down.",
-      "tags": [["C++", "blue"], ["Robotics", "roof"], ["Bluetooth", "sea"]],
-      "art": "loop",
-      "art_steps": ["Sense", "Drive", "Kick"]
+      "blurb": "A four-wheel soccer robot built from scratch, fully documented.",
+      "tags": [["C++", "roof"], ["Robotics", "grass"]]
     }
   ],
 
   "stack": [
-    { "label": "Languages",     "color": "blue",  "items": ["C", "C++", "Python", "JavaScript", "TypeScript", "C#"] },
-    { "label": "Systems",       "color": "sea",   "items": ["Linux", "System calls", "Git"] },
-    { "label": "Hardware",      "color": "grass", "items": ["STM32", "Sensor fusion", "Robotics"] },
-    { "label": "Also",          "color": "roof",  "items": ["Unity", "AR / VR", "YOLO", "Astro"] }
+    { "label": "Languages", "color": "blue",  "items": ["C", "C++", "Python", "JavaScript", "TypeScript", "C#"] },
+    { "label": "Systems",   "color": "sea",   "items": ["Linux", "System calls", "Git"] },
+    { "label": "Hardware",  "color": "grass", "items": ["STM32", "Sensor fusion", "Robotics"] },
+    { "label": "Also",      "color": "roof",  "items": ["Unity", "AR / VR", "YOLO", "Astro"] }
   ],
   "stack_note": "Taken from what is in my repos.",
-
-  "numbers": {
-    "hide_languages": ["HTML", "CSS", "Makefile", "ShaderLab", "HLSL"]
-  },
 
   "links": [
     { "label": "Repositories", "url": "https://github.com/JeyaVardhan-L?tab=repositories", "color": "blue" },
@@ -78,9 +55,12 @@
   ],
 
   "footer": {
+    "eyebrow": "Last stop",
     "title": "Thanks for *stopping by*.",
-    "text": "This page updates itself once a day, like a timetable. Say hello any time.",
-    "stops": ["Read", "Build", "Explain"],
-    "image": "tram.png"
+    "text": "Pick a repo above, or come back later. There is usually something new on the bench.",
+    "stickers": [
+      { "image": "tower.jpg",    "motion": [["leaves", [0, 0, 0.2, 0.45]], ["leaves", [0.82, 0, 1, 0.35]], ["drift", [0, 0.45, 0.58, 0.74]]] },
+      { "image": "hillside.jpg", "motion": [["water", [0, 0.52, 0.78, 0.95]], ["drift", [0.02, 0.03, 0.6, 0.42]]] }
+    ]
   }
 }

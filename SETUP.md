@@ -1,33 +1,27 @@
-# Setting up the profile
+# Editing the profile
 
-GitHub shows a README on your profile when it lives in a public repo named exactly like your username.
+Everything on the page comes from `build/profile.json`. To change something:
 
-1. **Make the repo.** On GitHub, create a new public repository called `your-username` (your real username). Leave it empty.
-2. **Fill in your details.** Edit `build/profile.json`: name, username, hero text, the IN/OUT answers, projects, toolbox, links. Mark italic accent words with `*stars*`.
-3. **Build.** From this folder:
-   ```
-   pip install fonttools pillow
-   python build/build.py
-   ```
-   This rewrites `README.md` and everything in `assets/`. Open `build/preview.html` through a local server (`python -m http.server`) to check it, with a dark-mode toggle.
-4. **Push.**
-   ```
-   git init -b main
-   git add .
-   git commit -m "Profile"
-   git remote add origin https://github.com/your-username/your-username.git
-   git push -u origin main
-   ```
-5. **Turn on the numbers card.** In the repo: Settings → Actions → General → Workflow permissions → "Read and write permissions". Then Actions → "Update numbers card" → Run workflow. After that it refreshes daily on its own.
+```
+pip install fonttools pillow
+python build/build.py
+git add . && git commit -m "Update profile" && git push
+```
 
-## Changing things later
+Never edit `README.md` or `assets/` by hand. The build rewrites them.
 
-- Text, projects, links: edit `profile.json`, run `build.py`, push.
-- Hero and footer paintings: drop a picture in `build/images/` and point to it from `profile.json`.
-- Project figures: each project has an animated line-art figure. Set `"art"` to `"shell"` (a pipeline with moving packets), `"rocket"` (a motor that gimbals) or `"loop"` (three stages and a dot going round; set the names with `"art_steps": ["Idea", "Build", "Ship"]`). To use your own animated image instead, put a small GIF or WebP in `build/images/` and set `"media": "demo.gif"`. Keep it under about 1 MB.
-- Colours: the `C` table at the top of `build/build.py`. Tag colours are `blue`, `sea`, `roof`, `grass`, `sun`, `amber`.
-- Never edit `README.md` or `assets/` by hand. They are regenerated.
+## What you can change
 
-## Why it's built this way
+- **Hero:** `title_lines` (put `*stars*` around the accent word), `lede`, and `typing`, the phrases typed after `$ now building`.
+- **Projects:** each row has a name, repo, a one-line blurb and up to two tags. The first tag's colour also colours the row's left edge.
+- **Stickers:** each sticker is a painting from `build/images/` plus a list of moving regions, given as fractions of the image `[x0, y0, x1, y1]`:
+  - `water`: ripples
+  - `leaves`: rustles
+  - `drift`: moves slowly sideways, good for clouds
+- **Colours:** the `C` table at the top of `build/build.py`. Tag colours are `blue`, `sea`, `roof`, `grass`, `sun` and `amber`.
 
-GitHub removes CSS, scripts and web fonts from READMEs. Images are allowed, and an SVG image can carry its own fonts and styles inside it. So each block is an SVG with Source Serif 4 and JetBrains Mono embedded (subset to keep files small), which means every visitor sees the same type.
+To preview locally, run `python -m http.server` in this folder and open `http://localhost:8000/build/preview.html`.
+
+## Why SVG
+
+GitHub removes CSS, scripts and web fonts from READMEs, but it shows SVG images, and an SVG can carry its own fonts and animations. The motion inside the paintings is an animated turbulence filter on the regions you list, so the files stay small. Visitors who have turned on reduced motion in their system settings see everything still.
