@@ -1,19 +1,50 @@
 {
   "name": "Lekkala Jeyavardhan",
   "username": "JeyaVardhan-L",
-
+  "avatar": {
+    "image": "avatar.png",
+    "crop": [46, 74, 194, 167],
+    "label": "Scan_01 · avatar"
+  },
   "hero": {
     "eyebrow": "Lekkala Jeyavardhan  ·  field notes",
     "title_lines": ["I build things", "to *see* how they work."],
     "lede": "Shells, flight computers, robots, and the guides that explain them.",
     "prompt": "$ now building ",
-    "typing": ["a Unix shell in C", "a rocket that steers itself", "a flight telemetry dashboard", "a robot that plays soccer"],
-    "stickers": [
-      { "image": "harbour.jpg", "motion": [["water", [0, 0.66, 1, 1]], ["drift", [0.62, 0.02, 0.98, 0.46]], ["leaves", [0, 0, 0.36, 0.4]]] },
-      { "image": "tram.png",    "motion": [["water", [0, 0.38, 0.47, 0.64]], ["water", [0.47, 0.38, 1, 0.47]], ["drift", [0.25, 0, 0.85, 0.4]], ["leaves", [0, 0.82, 1, 1]]] }
-    ]
+    "typing": ["a Unix shell in C", "a personal cloud server", "a rocket that steers itself", "a LiDAR odometry study"],
+    "scene": {
+      "image": "harbour.jpg",
+      "crop": [0, 0.3, 1, 0.92],
+      "motion": [[ "water", [0, 0.67, 1, 1]],
+        [
+          "leaves",
+          [0, 0, 0.36, 0.45]
+        ],
+        [
+          "drift",
+          [0.6, 0, 1, 0.5]
+        ]
+      ]
+    }
   },
-
+  "strips": [
+    {
+      "image": "hillside.jpg",
+      "crop": [0, 0.55, 1, 0.75],
+      "motion": [[ "water", [0, 0.55, 0.78, 1]]
+      ]
+    },
+    {
+      "image": "tower.jpg",
+      "crop": [0, 0.5, 1, 0.72],
+      "motion": [[ "drift", [0, 0.4, 0.58, 0.75]],
+        [
+          "leaves",
+          [0.74, 0.55, 1, 0.9]
+        ]
+      ]
+    }
+  ],
   "projects": [
     {
       "name": "ForgeShell",
@@ -22,45 +53,67 @@
       "tags": [["C", "blue"], ["Linux", "sea"]]
     },
     {
-      "name": "TVC Rocket",
-      "repo": "Single-Thrust-Vector-Controlled-Rocket",
-      "blurb": "A rocket that steers by tilting its single motor.",
-      "tags": [["Control", "grass"], ["Embedded", "sea"]]
-    },
-    {
-      "name": "Flight Telemetry",
-      "repo": "STM32-Flight_Telemetry",
-      "blurb": "3D flight telemetry from STM32 sensor fusion over Web Serial.",
-      "tags": [["STM32", "sea"], ["WebGL", "blue"]]
-    },
-    {
-      "name": "Robo Soccerbot",
-      "repo": "Robo_Soccerbot",
-      "blurb": "A four-wheel soccer robot built from scratch, fully documented.",
-      "tags": [["C++", "roof"], ["Robotics", "grass"]]
+      "name": "AutoNav",
+      "repo": "Baseline_tests_for_AutoNav",
+      "blurb": "Can LiDAR odometry meet a 10 Hz sensor's 100 ms deadline? A reproducible study.",
+      "tags": [["Python", "grass"], ["LiDAR", "roof"]]
     }
   ],
-
+  "more": {
+    "text": "Also: Batcave Cloud, a TVC rocket, flight telemetry, robots, and more in my repositories."
+  },
   "stack": [
-    { "label": "Languages", "color": "blue",  "items": ["C", "C++", "Python", "JavaScript", "TypeScript", "C#"] },
-    { "label": "Systems",   "color": "sea",   "items": ["Linux", "System calls", "Git"] },
-    { "label": "Hardware",  "color": "grass", "items": ["STM32", "Sensor fusion", "Robotics"] },
-    { "label": "Also",      "color": "roof",  "items": ["Unity", "AR / VR", "YOLO", "Astro"] }
+    {
+      "label": "Languages",
+      "color": "blue",
+      "items": ["C", "C++", "Python", "JavaScript", "TypeScript", "C#"]
+    },
+    {
+      "label": "Systems",
+      "color": "sea",
+      "items": ["Linux", "System calls", "Git"]
+    },
+    {
+      "label": "Hardware",
+      "color": "grass",
+      "items": ["STM32", "Sensor fusion", "LiDAR", "Robotics"]
+    },
+    {
+      "label": "Also",
+      "color": "roof",
+      "items": ["Unity", "AR / VR", "YOLO", "Astro"]
+    }
   ],
   "stack_note": "Taken from what is in my repos.",
-
   "links": [
-    { "label": "Repositories", "url": "https://github.com/JeyaVardhan-L?tab=repositories", "color": "blue" },
-    { "label": "ForgeShell",   "url": "https://github.com/JeyaVardhan-L/ForgeShell",        "color": "sea" }
+    {
+      "label": "Repositories",
+      "url": "https://github.com/JeyaVardhan-L?tab=repositories",
+      "color": "blue"
+    },
+    {
+      "label": "AutoNav results",
+      "url": "https://jeyavardhan-l.github.io/Baseline_tests_for_AutoNav/",
+      "color": "grass"
+    }
   ],
-
   "footer": {
     "eyebrow": "Last stop",
     "title": "Thanks for *stopping by*.",
-    "text": "Pick a repo above, or come back later. There is usually something new on the bench.",
-    "stickers": [
-      { "image": "tower.jpg",    "motion": [["leaves", [0, 0, 0.2, 0.45]], ["leaves", [0.82, 0, 1, 0.35]], ["drift", [0, 0.45, 0.58, 0.74]]] },
-      { "image": "hillside.jpg", "motion": [["water", [0, 0.52, 0.78, 0.95]], ["drift", [0.02, 0.03, 0.6, 0.42]]] }
-    ]
+    "text": "There is usually something new on the bench.",
+    "scene": {
+      "image": "tram.png",
+      "crop": [0, 0.38, 1, 0.86],
+      "motion": [[ "water", [0, 0.38, 0.47, 0.64]],
+        [
+          "water",
+          [0.47, 0.38, 1, 0.47]
+        ],
+        [
+          "drift",
+          [0.25, 0, 0.85, 0.42]
+        ]
+      ]
+    }
   }
 }

@@ -2,24 +2,25 @@
 
 <img src="assets/hero.svg" width="100%" alt="Lekkala Jeyavardhan: I build things to see how they work. Shells, flight computers, robots, and the guides that explain them.">
 
-<img src="assets/divider-01.svg" width="100%" alt="01 · Projects">
+<img src="assets/strip-01.svg" width="100%" alt="01 · Selected work">
 
 <p>
 <a href="https://github.com/JeyaVardhan-L/ForgeShell"><img src="assets/project-1.svg" width="100%" alt="ForgeShell: A resource-aware Unix shell in C: pipelines, job control, live /proc monitoring."></a>
-<a href="https://github.com/JeyaVardhan-L/Single-Thrust-Vector-Controlled-Rocket"><img src="assets/project-2.svg" width="100%" alt="TVC Rocket: A rocket that steers by tilting its single motor."></a>
-<a href="https://github.com/JeyaVardhan-L/STM32-Flight_Telemetry"><img src="assets/project-3.svg" width="100%" alt="Flight Telemetry: 3D flight telemetry from STM32 sensor fusion over Web Serial."></a>
-<a href="https://github.com/JeyaVardhan-L/Robo_Soccerbot"><img src="assets/project-4.svg" width="100%" alt="Robo Soccerbot: A four-wheel soccer robot built from scratch, fully documented."></a>
+<a href="https://github.com/JeyaVardhan-L/Baseline_tests_for_AutoNav"><img src="assets/project-2.svg" width="100%" alt="AutoNav: Can LiDAR odometry meet a 10 Hz sensor's 100 ms deadline? A reproducible study."></a>
+<a href="https://github.com/JeyaVardhan-L?tab=repositories"><img src="assets/project-more.svg" width="100%" alt="Also: Batcave Cloud, a TVC rocket, flight telemetry, robots, and more in my repositories. Read more."></a>
 </p>
 
-<img src="assets/divider-02.svg" width="100%" alt="02 · Toolbox">
+<img src="assets/strip-02.svg" width="100%" alt="02 · Commit city">
 
-<img src="assets/stack.svg" width="100%" alt="Toolbox: Languages: C, C++, Python, JavaScript, TypeScript, C#; Systems: Linux, System calls, Git; Hardware: STM32, Sensor fusion, Robotics; Also: Unity, AR / VR, YOLO, Astro">
+<img src="assets/city.svg" width="100%" alt="Commit city: my contribution graph as an isometric city, one building per day, rebuilt daily">
 
-<img src="assets/divider-03.svg" width="100%" alt="03 · Elsewhere">
+<img src="assets/divider-03.svg" width="100%" alt="03 · Toolbox">
+
+<img src="assets/stack.svg" width="100%" alt="Toolbox: Languages: C, C++, Python, JavaScript, TypeScript, C#; Systems: Linux, System calls, Git; Hardware: STM32, Sensor fusion, LiDAR, Robotics; Also: Unity, AR / VR, YOLO, Astro">
 
 <p align="center">
 <a href="https://github.com/JeyaVardhan-L?tab=repositories"><img src="assets/link-repositories.svg" height="44" alt="Repositories"></a>
-<a href="https://github.com/JeyaVardhan-L/ForgeShell"><img src="assets/link-forgeshell.svg" height="44" alt="ForgeShell"></a>
+<a href="https://jeyavardhan-l.github.io/Baseline_tests_for_AutoNav/"><img src="assets/link-autonav-results.svg" height="44" alt="AutoNav results"></a>
 </p>
 
 <img src="assets/footer.svg" width="100%" alt="Thanks for stopping by.">
