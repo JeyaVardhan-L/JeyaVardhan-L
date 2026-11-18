@@ -1,0 +1,86 @@
+{
+  "name": "Lekkala Jeyavardhan",
+  "username": "JeyaVardhan-L",
+
+  "hero": {
+    "eyebrow": "Lekkala Jeyavardhan  ·  field notes",
+    "title": "I build things to *see* how they work.",
+    "lede": "Shells, flight computers, robots, and the guides that explain them.",
+    "image": "tower.jpg"
+  },
+
+  "about": [
+    {
+      "q": "Who are you?",
+      "a": "A builder from India who likes to understand what happens underneath. I write C when I want to see the machine, and I wire up sensors when I want to see the physics."
+    },
+    {
+      "q": "What are you working on?",
+      "a": "ForgeShell, a Unix shell with a field guide that explains every line, and a rocket that steers by tilting its motor."
+    }
+  ],
+
+  "projects": [
+    {
+      "name": "ForgeShell",
+      "repo": "ForgeShell",
+      "status": "active",
+      "blurb": "A resource-aware Unix shell in C: pipelines, job control and live /proc process monitoring.",
+      "tags": [["C", "blue"], ["POSIX", "sea"], ["Linux", "roof"]],
+      "art": "shell",
+      "art_text": "$ ls | grep .c | wc -l",
+      "art_out": "→ 14"
+    },
+    {
+      "name": "TVC Rocket",
+      "repo": "Single-Thrust-Vector-Controlled-Rocket",
+      "status": "building",
+      "blurb": "A rocket that steers by tilting its single motor, with a control loop holding it upright.",
+      "tags": [["Control", "grass"], ["Embedded", "sea"], ["JavaScript", "blue"]],
+      "art": "rocket",
+      "art_text": "Gimbal ±8°"
+    },
+    {
+      "name": "Flight Telemetry",
+      "repo": "STM32-Flight_Telemetry",
+      "status": "built",
+      "blurb": "A 3D flight telemetry dashboard fed by STM32 sensor fusion over Web Serial.",
+      "tags": [["STM32", "sea"], ["Sensors", "grass"], ["WebGL", "blue"]],
+      "art": "telemetry",
+      "art_text": "STM32 → Web Serial"
+    },
+    {
+      "name": "Robo Soccerbot",
+      "repo": "Robo_Soccerbot",
+      "status": "documented",
+      "blurb": "A four-wheel robot soccer bot built from scratch, with the whole journey written down.",
+      "tags": [["C++", "blue"], ["Robotics", "roof"], ["Bluetooth", "sea"]],
+      "art": "loop",
+      "art_steps": ["Sense", "Drive", "Kick"]
+    }
+  ],
+
+  "stack": [
+    { "label": "Languages",     "color": "blue",  "items": ["C", "C++", "Python", "JavaScript", "TypeScript", "C#"] },
+    { "label": "Systems",       "color": "sea",   "items": ["Linux", "System calls", "Git"] },
+    { "label": "Hardware",      "color": "grass", "items": ["STM32", "Sensor fusion", "Robotics"] },
+    { "label": "Also",          "color": "roof",  "items": ["Unity", "AR / VR", "YOLO", "Astro"] }
+  ],
+  "stack_note": "Taken from what is in my repos.",
+
+  "numbers": {
+    "hide_languages": ["HTML", "CSS", "Makefile", "ShaderLab", "HLSL"]
+  },
+
+  "links": [
+    { "label": "Repositories", "url": "https://github.com/JeyaVardhan-L?tab=repositories", "color": "blue" },
+    { "label": "ForgeShell",   "url": "https://github.com/JeyaVardhan-L/ForgeShell",        "color": "sea" }
+  ],
+
+  "footer": {
+    "title": "Thanks for *stopping by*.",
+    "text": "This page updates itself once a day, like a timetable. Say hello any time.",
+    "stops": ["Read", "Build", "Explain"],
+    "image": "tram.png"
+  }
+}
