@@ -12,20 +12,20 @@ Never edit `README.md` or `assets/` by hand. The build rewrites them.
 
 ## What you can change
 
-- **Hero:** `title_lines` (put `*stars*` around the accent word), `lede`, and `typing`, the phrases typed after `$ now building`.
-- **Projects:** each row has a name, repo, a one-line blurb and up to two tags. Keep two or three; `more` is the "read more" line under them.
-- **Pixel scenes** (hero, section strips, footer): each one names a painting in `build/images/`, a `crop` of it as fractions `[x0, y0, x1, y1]`, and moving regions in the same units:
-  - `water`: rows shimmer, with sparkles
+- **Hero:** `name_line` (put `*stars*` around the red accent word), `typing` (the phrases typed after `$ now building`) and `meta`. There is no tagline on purpose; add one to `meta` when you want it.
+- **Projects:** two cards side by side, each with a name, repo, blurb and two tags. `more.items` are the chips in the "Also" row, which links to all your repositories.
+- **Scenes** (hero, section strips, footer): each one names a painting in `build/images/`, a `crop` of it as fractions `[x0, y0, x1, y1]`, and moving regions in the same units:
+  - `water`: ripples, with sun glints
   - `leaves`: sways
   - `drift`: moves slowly sideways, good for clouds
 
-  The build shrinks the painting to pixel art, animates it frame by frame and dithers its edges into the background.
+  The painting stays at full resolution. Only its edges break into small pixel blocks and darken into the background.
 - **Avatar:** `avatar.png` is your GitHub picture. `crop` (in pixels) picks the part that becomes ASCII art.
 - **Commit city:** built from your public contribution calendar. A GitHub Action rebuilds it every day, and whenever `build/` changes. You can also run it from the Actions tab ("Rebuild commit city").
-- **Colours:** the `C` table at the top of `build/build.py`. Tag colours are `blue`, `sea`, `roof`, `grass`, `sun` and `amber`.
+- **Colours:** the `C` table at the top of `build/build.py`. Tag colours are `red`, `coral`, `amber`, `rose` and `sand`.
 
 To preview locally, run `python -m http.server` in this folder and open `http://localhost:8000/build/preview.html`.
 
 ## Why SVG
 
-GitHub removes CSS, scripts and web fonts from READMEs, but it shows SVG images, and an SVG can carry its own fonts and animations. The pixel scenes are small sprite sheets that CSS steps through, so the files stay small. Visitors who have turned on reduced motion in their system settings see everything still.
+GitHub removes CSS, scripts and web fonts from READMEs, but it shows SVG images, and an SVG can carry its own fonts and animations. The motion in the paintings comes from SVG filters and CSS, so the files stay small. Visitors who have turned on reduced motion in their system settings see everything still.
