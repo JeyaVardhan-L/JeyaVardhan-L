@@ -19,12 +19,12 @@ ROOT = os.path.dirname(HERE)
 ASSETS = os.path.join(ROOT, "assets")
 
 C = {
-    # night paper with a warm cast, light ink, and one red accent
-    "panel": "#100c0d", "card": "#171112", "edge": "#2e2224",
-    "ink": "#f3eded", "ink2": "#c7b9ba", "muted": "#917f81", "faint": "#5d4c4e",
-    "accent": "#ff5a5f", "accent2": "#ff8a8e", "grid": "rgba(255,90,95,0.05)",
-    # tag colours, all warm so the page stays red without being one flat colour
-    "red": "#ff5a5f", "coral": "#ff8f6b", "amber": "#f5b452", "rose": "#f07aa4", "sand": "#e7c9a0",
+    # neutral near-black, clean greys, and a true red accent (hue 356, no orange in it)
+    "panel": "#0b0b0c", "card": "#121214", "edge": "#26262b",
+    "ink": "#f5f5f7", "ink2": "#bcbcc4", "muted": "#85858f", "faint": "#4c4c55",
+    "accent": "#ff1f2d", "accent2": "#ff5c66", "grid": "rgba(255,31,45,0.045)",
+    # tag colours: reds and neutrals only
+    "red": "#ff1f2d", "crimson": "#e0101e", "rose": "#ff5c66", "white": "#e9e9ee", "steel": "#9a9aa6",
 }
 
 FONT_FILES = {
@@ -206,11 +206,11 @@ def divider(num, title):
     left_end, right_start = W / 2 - lw / 2 - 20, W / 2 + lw / 2 + 20
     x = 2.0
     while x + 4 <= left_end:
-        s.add(f'<rect x="{x:.1f}" y="20" width="4" height="4" fill="#3a2b2e"/>')
+        s.add(f'<rect x="{x:.1f}" y="20" width="4" height="4" fill="#2a2a30"/>')
         x += 9
     x = W - 6
     while x >= right_start:
-        s.add(f'<rect x="{x:.1f}" y="20" width="4" height="4" fill="#3a2b2e"/>')
+        s.add(f'<rect x="{x:.1f}" y="20" width="4" height="4" fill="#2a2a30"/>')
         x -= 9
     s.used.add(("mono", 500, "normal"))
     s.add(f'<text x="500" y="26.5" class="m" font-size="12" font-weight="500" letter-spacing="1.4" '
@@ -262,129 +262,410 @@ def link_button(l):
 
 
 
-# ---------------------------------------------------------------- scenes
-# A painting is shown at its full resolution (sharpened a little, never upscaled in the file),
-# and parts of it move: water ripples and sparkles, leaves sway, clouds drift. Only its edges
-# break into small crisp blocks, an ordered-plus-noise dither, so it sinks into the dark panel.
+# ---------------------------------------------------------------- pixel scenes
+# Every scene is pixel art drawn here in code, about things I build: a TVC rocket launch,
+# a LiDAR scan, a night skyline, and the Batcave. Pixels are SVG rects (runs merged per row,
+# crispEdges), so they stay sharp at any size. Moving parts are separate sprites animated with
+# CSS steps(), so they move one pixel at a time like real pixel art.
 
 import numpy as np
-from PIL import ImageEnhance
 
 BAYER = (np.array([[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]]) + 0.5) / 16
 
-EFFECTS = {
-    # kind: (turbulence baseFrequency from, to, displacement scale, seconds)
-    "water": ("0.006 0.10", "0.008 0.13", 3.2, 5),
-    "leaves": ("0.03 0.04", "0.036 0.046", 2.6, 4),
+PX = {   # the scene palette: neutral blacks and greys, true reds, a little white
+    "void": "#0b0b0c", "night1": "#0f0b0c", "night2": "#170a0c", "night3": "#22090d", "night4": "#33090f",
+    "glow": "#4d0a12", "hill1": "#1a0d0f", "hill2": "#111012", "ground": "#0d0d0f", "rim": "#6e0b15",
+    "red": "#ff1f2d", "red2": "#e0101e", "red3": "#a50d18", "red4": "#6a0a12",
+    "pink": "#ff8a94", "white": "#f5f5f7", "grey": "#9a9aa3", "grey2": "#55555d", "grey3": "#2c2c32",
+    "steel": "#3a3a42", "black": "#050506",
 }
 
 
-def to_uri(im, quality=92):
-    buf = io.BytesIO()
-    im.save(buf, "JPEG", quality=quality, optimize=True, progressive=True, subsampling=0)
-    return "data:image/jpeg;base64," + base64.b64encode(buf.getvalue()).decode()
+def mix(a, b, t):
+    ca = np.array([int(a[i:i + 2], 16) for i in (1, 3, 5)])
+    cb = np.array([int(b[i:i + 2], 16) for i in (1, 3, 5)])
+    c = ca * (1 - t) + cb * t
+    return "#%02x%02x%02x" % tuple(int(round(v)) for v in c)
 
 
-def dissolve_mask(gw, gh, fade, seed=7):
-    xs, ys = np.meshgrid(np.arange(gw) + 0.5, np.arange(gh) + 0.5)
-    l, r, t, b = fade
-    k = np.ones((gh, gw))
-    if l: k = np.minimum(k, xs / (l * gw))
-    if r: k = np.minimum(k, (gw - xs) / (r * gw))
-    if t: k = np.minimum(k, ys / (t * gh))
-    if b: k = np.minimum(k, (gh - ys) / (b * gh))
-    k = np.clip(k, 0, 1)
-    k = k * k * (3 - 2 * k)
-    noise = np.random.default_rng(seed).random((gh, gw))
-    th = 0.45 * BAYER[np.arange(gh)[:, None] % 4, np.arange(gw)[None, :] % 4] + 0.55 * noise
-    m = Image.fromarray(((k > th) * 255).astype(np.uint8), "L")
-    buf = io.BytesIO()
-    m.save(buf, "PNG", optimize=True)
-    return "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode()
+class Pix:
+    """A grid of colours (or None). Rendered as merged rects at pixel size P."""
+
+    def __init__(self, gw, gh):
+        self.gw, self.gh = gw, gh
+        self.g = [[None] * gw for _ in range(gh)]
+
+    def set(self, x, y, c):
+        x, y = int(x), int(y)
+        if 0 <= x < self.gw and 0 <= y < self.gh:
+            self.g[y][x] = c
+
+    def get(self, x, y):
+        return self.g[y][x] if 0 <= x < self.gw and 0 <= y < self.gh else None
+
+    def rect(self, x, y, w, h, c):
+        for yy in range(int(y), int(y + h)):
+            for xx in range(int(x), int(x + w)):
+                self.set(xx, yy, c)
+
+    def sprite(self, x, y, art, cmap):
+        for j, row in enumerate(art):
+            for i, ch in enumerate(row):
+                if ch in cmap:
+                    self.set(x + i, y + j, PX.get(cmap[ch], cmap[ch]))
+
+    def sky(self, stops, y0=0, y1=None):
+        """Vertical gradient between palette stops, dithered like old games."""
+        y1 = self.gh if y1 is None else y1
+        n = len(stops) - 1
+        for y in range(y0, y1):
+            t = (y - y0) / max(1, y1 - y0 - 1) * n
+            for x in range(self.gw):
+                i = min(n, int(t + BAYER[y % 4, x % 4] - 0.5 + 0.5))
+                self.set(x, y, PX.get(stops[i], stops[i]))
+
+    def fade(self, l=0.0, r=0.0, t=0.0, b=0.0, seed=1):
+        """Dissolve edges into the page: pixels thin out and darken towards the edge."""
+        rnd = np.random.default_rng(seed).random((self.gh, self.gw))
+        for y in range(self.gh):
+            for x in range(self.gw):
+                k = 1.0
+                if l: k = min(k, (x + 0.5) / (l * self.gw))
+                if r: k = min(k, (self.gw - x - 0.5) / (r * self.gw))
+                if t: k = min(k, (y + 0.5) / (t * self.gh))
+                if b: k = min(k, (self.gh - y - 0.5) / (b * self.gh))
+                if k >= 1 or self.g[y][x] is None:
+                    continue
+                k = max(0.0, k)
+                if k < 0.45 * BAYER[y % 4, x % 4] + 0.55 * rnd[y, x]:
+                    self.g[y][x] = None
+                else:
+                    self.g[y][x] = mix(self.g[y][x], C["panel"], (1 - k) * 0.7)
+
+    def svg(self, P, x0=0, y0=0):
+        out = []
+        for y in range(self.gh):
+            x = 0
+            row = self.g[y]
+            while x < self.gw:
+                c = row[x]
+                if c is None:
+                    x += 1
+                    continue
+                x1 = x
+                while x1 < self.gw and row[x1] == c:
+                    x1 += 1
+                out.append(f'<rect x="{x0 + x*P:g}" y="{y0 + y*P:g}" width="{(x1-x)*P:g}" height="{P:g}" fill="{c}"/>')
+                x = x1
+        return "".join(out)
 
 
-def scene(s, sid, spec, x, y, w, h, fade=(0.06, 0.06, 0.0, 0.42), block=4):
-    im = Image.open(os.path.join(HERE, "images", spec["image"])).convert("RGB")
-    W0, H0 = im.size
-    cx0, cy0, cx1, cy1 = spec["crop"]
-    im = im.crop((round(cx0 * W0), round(cy0 * H0), round(cx1 * W0), round(cy1 * H0)))
-    im = ImageEnhance.Sharpness(im).enhance(1.35)
-    im = ImageEnhance.Contrast(im).enhance(1.05)
-    iw, ih = im.size
-    sc = max(w / iw, h / ih)
-    dw, dh = iw * sc, ih * sc
-    dx, dy = x + (w - dw) / 2, y + (h - dh) / 2
-    uri = to_uri(im)
+def sprite_svg(art, cmap, P, x0, y0):
+    p = Pix(max(len(r) for r in art), len(art))
+    p.sprite(0, 0, art, cmap)
+    return p.svg(P, x0, y0)
 
-    def region(r):
-        a, b, c, d = r
-        X = lambda v: dx + np.clip((v - cx0) / (cx1 - cx0), 0, 1) * dw
-        Y = lambda v: dy + np.clip((v - cy0) / (cy1 - cy0), 0, 1) * dh
-        return X(a), Y(b), X(c) - X(a), Y(d) - Y(b)
 
-    gw, gh = int(np.ceil(w / block)), int(np.ceil(h / block))
-    s.defs.append(f'<image id="{sid}" href="{uri}" xlink:href="{uri}" x="{dx:.1f}" y="{dy:.1f}" '
-                  f'width="{dw:.1f}" height="{dh:.1f}" preserveAspectRatio="none"/>')
-    mask = dissolve_mask(gw, gh, fade, seed=len(sid) * 13)
-    s.defs.append(f'<mask id="{sid}-dis" maskUnits="userSpaceOnUse" x="{x}" y="{y}" width="{w}" height="{h}">'
-                  f'<image href="{mask}" xlink:href="{mask}" x="{x}" y="{y}" width="{gw*block}" height="{gh*block}" '
-                  f'preserveAspectRatio="none" image-rendering="optimizeSpeed" style="image-rendering:pixelated"/></mask>')
-    s.defs.append(f'<clipPath id="{sid}-c"><rect x="{x}" y="{y}" width="{w}" height="{h}"/></clipPath>')
-    if "feather" not in s.css:
-        s.defs.append('<filter id="feather" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="5"/></filter>')
-        s.css.add("feather")
-    s.css.add("@keyframes drift{from{transform:translateX(-6px)}to{transform:translateX(8px)}}"
-              ".drift{animation:drift 16s ease-in-out infinite alternate}"
-              "@keyframes spark{0%,100%{opacity:0}45%{opacity:0}50%{opacity:1}58%{opacity:0}}"
-              ".spark{animation:spark 3s linear infinite}")
-    s.add(f'<g mask="url(#{sid}-dis)"><g clip-path="url(#{sid}-c)"><use href="#{sid}" xlink:href="#{sid}"/>')
-    rnd = np.random.default_rng(len(sid))
-    for i, (kind, r) in enumerate(spec.get("motion", [])):
-        rx, ry, rw, rh = region(r)
-        if rw < 2 or rh < 2:
-            continue
-        mid = f"{sid}-m{i}"
-        s.defs.append(f'<mask id="{mid}" maskUnits="userSpaceOnUse" x="{x}" y="{y}" width="{w}" height="{h}">'
-                      f'<rect x="{rx+6:.1f}" y="{ry+6:.1f}" width="{max(rw-12, 1):.1f}" height="{max(rh-12, 1):.1f}" '
-                      f'fill="#fff" filter="url(#feather)"/></mask>')
-        if kind == "drift":
-            s.add(f'<g mask="url(#{mid})"><g class="a drift" style="animation-delay:-{i*3}s">'
-                  f'<use href="#{sid}" xlink:href="#{sid}"/></g></g>')
-            continue
-        f0, f1, scale, dur = EFFECTS[kind]
-        fid = f"{mid}-f"
-        s.defs.append(
-            f'<filter id="{fid}" filterUnits="userSpaceOnUse" x="{rx-8:.1f}" y="{ry-8:.1f}" width="{rw+16:.1f}" height="{rh+16:.1f}">'
-            f'<feTurbulence type="turbulence" baseFrequency="{f0}" numOctaves="2" seed="{4+i}" result="n">'
-            f'<animate attributeName="baseFrequency" dur="{dur}s" values="{f0};{f1};{f0}" repeatCount="indefinite"/>'
-            f'</feTurbulence><feDisplacementMap in="SourceGraphic" in2="n" scale="{scale}" '
-            f'xChannelSelector="R" yChannelSelector="G"/></filter>')
-        s.add(f'<g mask="url(#{mid})"><use href="#{sid}" xlink:href="#{sid}" filter="url(#{fid})"/></g>')
-        if kind == "water":   # sun glints on the water
-            for _ in range(int(rw * rh / 1800)):
-                px, py = rx + rnd.random() * rw, ry + rh * (0.15 + 0.8 * rnd.random())
-                s.add(f'<rect class="a spark" style="animation-delay:-{rnd.random()*3:.2f}s;animation-duration:{2.4+rnd.random()*2:.1f}s" '
-                      f'x="{px:.1f}" y="{py:.1f}" width="{2+rnd.random()*3:.1f}" height="1.2" fill="#fff8ec"/>')
-    # pixels darken as they break apart, so the edge melts into the panel instead of sparkling
-    l, r, t, b = fade
-    for side, frac in (("l", l), ("r", r), ("t", t), ("b", b)):
-        if not frac:
-            continue
-        gid = f"{sid}-g{side}"
-        x1, y1, x2, y2 = {"l": (1, 0, 0, 0), "r": (0, 0, 1, 0), "t": (0, 1, 0, 0), "b": (0, 0, 0, 1)}[side]
-        s.defs.append(f'<linearGradient id="{gid}" x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}">'
-                      f'<stop offset="0" stop-color="{C["panel"]}" stop-opacity="0"/>'
-                      f'<stop offset="1" stop-color="{C["panel"]}" stop-opacity="0.92"/></linearGradient>')
-        if side in "lr":
-            gw_ = w * frac
-            gx = x if side == "l" else x + w - gw_
-            s.add(f'<rect x="{gx:.1f}" y="{y}" width="{gw_:.1f}" height="{h}" fill="url(#{gid})"/>')
+def disc(p, cx, cy, r, colour_at):
+    for y in range(int(cy - r - 1), int(cy + r + 2)):
+        for x in range(int(cx - r - 1), int(cx + r + 2)):
+            if (x - cx) ** 2 + (y - cy) ** 2 <= r * r:
+                c = colour_at(x, y)
+                if c:
+                    p.set(x, y, c)
+
+
+def hills(p, base, amp, freq, phase, colour, rim=None):
+    for x in range(p.gw):
+        top = int(round(base - amp * (0.6 * np.sin(x * freq + phase) + 0.4 * np.sin(x * freq * 2.3 + phase * 1.7))))
+        for y in range(max(0, top), p.gh):
+            p.set(x, y, colour)
+        if rim:
+            p.set(x, top, rim)
+
+
+def stars(s, p, P, x0, y0, n, ymax, seed, twinkle=0.4):
+    rnd = np.random.default_rng(seed)
+    s.css.add("@keyframes tw{0%,100%{opacity:.15}50%{opacity:1}}.tw{animation:tw 3s steps(4) infinite}")
+    out = []
+    for _ in range(n):
+        x, y = rnd.integers(0, p.gw), rnd.integers(0, ymax)
+        col = PX["white"] if rnd.random() < 0.7 else PX["pink"]
+        if rnd.random() < twinkle:
+            out.append(f'<rect class="a tw" style="animation-delay:-{rnd.random()*3:.1f}s;animation-duration:{2+rnd.random()*3:.1f}s" '
+                       f'x="{x0+x*P}" y="{y0+y*P}" width="{P}" height="{P}" fill="{col}"/>')
         else:
-            gh_ = h * frac
-            gy = y if side == "t" else y + h - gh_
-            s.add(f'<rect x="{x}" y="{gy:.1f}" width="{w}" height="{gh_:.1f}" fill="url(#{gid})"/>')
-    s.add("</g></g>")
+            p.set(x, y, mix(col, PX["void"], 0.45))
+    return "".join(out)
 
+
+# --- sprites ---------------------------------------------------------------
+
+ROCKET = [
+    "...w...",
+    "..www..",
+    "..www..",
+    ".wwwww.",
+    ".wwRww.",
+    ".wwwww.",
+    ".wgwww.",
+    ".wwwww.",
+    ".wwwww.",
+    "RwwwwwR",
+    "RRwwwRR",
+    "R.sss.R",
+]
+FLAME = [
+    [".rppr.", "..rhr..", "..rpr..", "...r...", "...d..."],
+    [".rpppr.", ".rphpr.", "..rpr..", "..rd...", "..d...."],
+    [".rpppr.", ".rphpr.", "..rpr..", "...dr..", "....d.."],
+]
+FLAME_MAP = {"h": "white", "p": "pink", "r": "red", "d": "red3"}
+ROCKET_MAP = {"w": "white", "R": "red", "g": "grey", "s": "grey2"}
+
+BAT = [
+    ["b.......b", "bb.....bb", ".bbb.bbb.", "..bbbbb..", "....b...."],
+    ["....b....", "..bbbbb..", ".bbbbbbb.", "bb..b..bb", "b.......b"],
+]
+DRONE = [
+    ["ww.....ww", ".g.....g.", ".ggggggg.", "...ggg...", "........."],
+    ["-w.....w-", ".g.....g.", ".ggggggg.", "...ggg...", "........."],
+]
+ROVER = [
+    "....RR....",
+    ".....g....",
+    ".gggggggg.",
+    "gggggggggg",
+    ".o..o..o..",
+]
+
+
+def launch_scene(s, x0, y0, W, H, P=5):
+    gw, gh = W // P, H // P
+    p = Pix(gw, gh)
+    ground = gh - 10
+    p.sky(["void", "night1", "night2", "night3", "night4", "glow"], 0, ground)
+    # striped synthwave sun, sinking behind the hills
+    cx, cy, r = int(gw * 0.74), ground - 13, 14
+
+    def sun(x, y):
+        if y > cy - 2 and (y - cy + 2) % 3 == 0:   # the stripes get closer near the horizon
+            return None
+        t = (y - (cy - r)) / (2 * r)
+        return mix(PX["red"], PX["red4"], max(0, min(1, t)) ** 1.2)
+    disc(p, cx, cy, r, sun)
+    hills(p, ground - 4, 4, 0.045, 1.2, PX["hill1"], PX["rim"])
+    hills(p, ground + 1, 3, 0.08, 4.0, PX["hill2"], PX["red4"])
+    p.rect(0, ground + 2, gw, gh - ground - 2, PX["ground"])
+    for y in range(ground + 2, gh):   # ground darkens into the page
+        for x in range(gw):
+            if (y - ground) / (gh - ground) > BAYER[y % 4, x % 4] + 0.25:
+                p.set(x, y, C["panel"])
+    # launch tower: a lattice with a warning light
+    tx, pad = int(gw * 0.13), ground + 1
+    for y in range(pad - 22, pad):
+        p.set(tx, y, PX["steel"]); p.set(tx + 3, y, PX["steel"])
+        if y % 3 == 0:
+            p.rect(tx, y, 4, 1, PX["steel"])
+        elif y % 3 == 1:
+            p.set(tx + 1, y, PX["grey3"]); p.set(tx + 2, y, PX["grey3"])
+    for i in range(3):
+        p.set(tx + 4 + i, pad - 18 + i * 6, PX["grey3"])
+    p.rect(tx - 2, pad, 14, 1, PX["steel"])
+    star_svg = stars(s, p, P, x0, y0, 42, ground - 14, seed=4)
+    p.fade(l=0.04, r=0.04)
+    s.add(f'<g shape-rendering="crispEdges">{p.svg(P, x0, y0)}{star_svg}')
+    # tower light
+    s.css.add("@keyframes blink{0%,49%{opacity:1}50%,100%{opacity:.1}}.blink{animation:blink 1.2s steps(1) infinite}")
+    s.add(f'<rect class="a blink" x="{x0+(tx+1)*P}" y="{y0+(pad-23)*P}" width="{2*P}" height="{P}" fill="{PX["red"]}"/>')
+    # shooting star now and then
+    s.css.add("@keyframes shoot{0%{transform:translate(0,0);opacity:0}2%{opacity:1}10%{transform:translate(-240px,120px);opacity:0}100%{opacity:0}}"
+              ".shoot{opacity:0;animation:shoot 11s steps(24) infinite 3s}")
+    sx, sy = x0 + int(gw * 0.55) * P, y0 + 3 * P
+    s.add(f'<g class="a shoot">' + "".join(
+        f'<rect x="{sx+i*P}" y="{sy-i*P//2}" width="{P}" height="{P}" fill="{mix(PX["white"], PX["void"], i/5)}"/>' for i in range(5)) + "</g>")
+    # the rocket: ignites, its flame swings like a gimballed motor, climbs, gone, again
+    rx = x0 + (tx + 5) * P
+    ry = y0 + (pad - len(ROCKET)) * P
+    T = 9
+    s.css.add(
+        f"@keyframes lift{{0%,22%{{transform:translateY(0);opacity:1}}"
+        f"45%{{transform:translateY(-40px)}}62%{{transform:translateY(-130px)}}"
+        f"80%{{transform:translateY(-{H+20}px);opacity:1}}80.5%,100%{{transform:translateY(-{H+20}px);opacity:0}}}}"
+        f".lift{{animation:lift {T}s steps(90) infinite}}"
+        f"@keyframes ign{{0%,9%{{opacity:0}}10%,80%{{opacity:1}}81%,100%{{opacity:0}}}}.ign{{animation:ign {T}s steps(1) infinite}}"
+        "@keyframes fA{0%,32%{opacity:1}33%,100%{opacity:0}}@keyframes fB{0%,32%{opacity:0}33%,65%{opacity:1}66%,100%{opacity:0}}"
+        "@keyframes fC{0%,65%{opacity:0}66%,100%{opacity:1}}"
+        ".fA{animation:fA .36s steps(1) infinite}.fB{animation:fB .36s steps(1) infinite}.fC{animation:fC .36s steps(1) infinite}"
+        f"@keyframes puff{{0%,10%{{opacity:0}}12%,30%{{opacity:1}}40%,100%{{opacity:0}}}}.puff{{animation:puff {T}s steps(1) infinite}}"
+        f"@keyframes trail{{0%,24%{{opacity:0}}28%,80%{{opacity:1}}81%,100%{{opacity:0}}}}.trail{{animation:trail {T}s steps(1) infinite}}")
+    flames = "".join(f'<g class="a f{k}">{sprite_svg(FLAME[i], FLAME_MAP, P, rx, ry + len(ROCKET)*P)}</g>' for i, k in enumerate("ABC"))
+    trail = "".join(f'<rect x="{rx+3*P}" y="{ry+(len(ROCKET)+5+i)*P}" width="{P}" height="{P}" '
+                    f'fill="{mix(PX["grey2"], PX["void"], i/14)}"/>' for i in range(0, 14, 1 if True else 2))
+    s.add(f'<g class="a lift">{sprite_svg(ROCKET, ROCKET_MAP, P, rx, ry)}'
+          f'<g class="a ign">{flames}</g><g class="a trail">{trail}</g></g>')
+    puff = Pix(17, 3)
+    for i, c in enumerate([".gg..ggg...gg..g.", "ggggggggggggggggg", ".g.ggg...ggg.g..."]):
+        for j, ch in enumerate(c):
+            if ch == "g":
+                puff.set(j, i, PX["grey3"] if i else PX["steel"])
+    s.add(f'<g class="a puff">{puff.svg(P, rx - 5*P, y0 + (pad-2)*P)}</g>')
+    s.add("</g>")
+
+
+def lidar_scene(s, x0, y0, W, H, P=5):
+    gw, gh = W // P, H // P
+    p = Pix(gw, gh)
+    p.sky(["void", "void", "night1", "night2", "night3"], 0, gh)
+    surface = []
+    tops = [int(round(gh - 7 - 1.6 * np.sin(x / 9) - np.sin(x / 4.3 + 1))) for x in range(gw)]
+    rnd = np.random.default_rng(9)
+    for x in range(gw):
+        for y in range(tops[x], gh):
+            p.set(x, y, PX["ground"])
+        surface.append((x, tops[x]))
+    for _ in range(9):   # rocks
+        rx_, w = rnd.integers(50, gw - 6), rnd.integers(2, 4)
+        hgt = rnd.integers(1, 3)
+        for i in range(w):
+            for j in range(hgt):
+                p.set(rx_ + i, tops[rx_ + i] - 1 - j, PX["ground"])
+            surface.append((rx_ + i, tops[rx_ + i] - hgt))
+    star_svg = stars(s, p, P, x0, y0, 22, gh - 9, seed=12, twinkle=0.3)
+    p.fade(l=0.22, r=0.12, t=0.15, b=0.1, seed=3)
+    s.add(f'<g shape-rendering="crispEdges">{p.svg(P, x0, y0)}{star_svg}')
+    T = 4.0
+    s.css.add(f"@keyframes ping{{0%{{opacity:1}}25%{{opacity:.25}}100%{{opacity:.25}}}}.ping{{animation:ping {T}s linear infinite}}"
+              f"@keyframes sweep{{from{{transform:translateX(0)}}to{{transform:translateX({W}px)}}}}"
+              f".sweep{{animation:sweep {T}s steps({gw}) infinite}}")
+    # point cloud: every surface pixel lights up as the scan line passes it
+    for (x, y) in surface:
+        if x < 34:
+            continue
+        col = PX["red"] if (x + y) % 3 else PX["pink"]
+        s.add(f'<rect class="a ping" style="animation-delay:{x/gw*T - T:.2f}s" x="{x0+x*P}" y="{y0+(y-1)*P}" '
+              f'width="{P}" height="{P}" fill="{col}" opacity=".25"/>')
+    beam = "".join(f'<rect x="{x0}" y="{y0+j*P}" width="{P}" height="{P}" fill="{PX["red"]}" opacity="{0.15+0.6*j/gh:.2f}"/>' for j in range(gh - 4))
+    s.add(f'<g class="a sweep">{beam}</g>')
+    rx = 40
+    s.add(sprite_svg(ROVER, {"R": "red", "g": "grey", "o": "grey2"}, P, x0 + rx * P, y0 + (tops[rx + 4] - len(ROVER)) * P))
+    s.add(f'<rect class="a blink" x="{x0+(rx+4)*P}" y="{y0+(tops[rx+4]-len(ROVER))*P}" width="{2*P}" height="{P}" fill="{PX["white"]}"/>')
+    s.css.add("@keyframes blink{0%,49%{opacity:1}50%,100%{opacity:.1}}.blink{animation:blink 1.2s steps(1) infinite}")
+    s.add("</g>")
+
+
+def skyline_scene(s, x0, y0, W, H, P=5):
+    gw, gh = W // P, H // P
+    p = Pix(gw, gh)
+    p.sky(["void", "void", "night1", "night2", "night3", "night4"], 0, gh)
+    rnd = np.random.default_rng(21)
+    lights, x = [], 0
+    while x < gw:
+        bw, bh = int(rnd.integers(4, 10)), int(rnd.integers(5, gh - 3))
+        col = PX["hill2"] if rnd.random() < 0.5 else "#151518"
+        p.rect(x, gh - bh, bw, bh, col)
+        for wy in range(gh - bh + 2, gh - 1, 2):
+            for wx in range(x + 1, x + bw - 1, 2):
+                r = rnd.random()
+                if r < 0.30:
+                    c = PX["red3"] if r < 0.22 else (PX["white"] if r < 0.25 else PX["pink"])
+                    if rnd.random() < 0.18:
+                        lights.append((wx, wy, c))
+                    else:
+                        p.set(wx, wy, mix(c, col, 0.25))
+        if bh > gh - 8 and bw >= 5:
+            p.rect(x + bw // 2, gh - bh - 3, 1, 3, PX["steel"])
+            lights.append((x + bw // 2, gh - bh - 4, "antenna"))
+        x += bw + int(rnd.integers(0, 2))
+    star_svg = stars(s, p, P, x0, y0, 18, 6, seed=31, twinkle=0.5)
+    p.fade(l=0.25, r=0.1, t=0.2, seed=5)
+    s.add(f'<g shape-rendering="crispEdges">{p.svg(P, x0, y0)}{star_svg}')
+    s.css.add("@keyframes win{0%,100%{opacity:.2}50%{opacity:1}}.win{animation:win 3.4s steps(3) infinite}"
+              "@keyframes blink{0%,49%{opacity:1}50%,100%{opacity:.1}}.blink{animation:blink 1.2s steps(1) infinite}")
+    for (lx, ly, c) in lights:
+        if lx < gw * 0.18:
+            continue
+        if c == "antenna":
+            s.add(f'<rect class="a blink" style="animation-delay:-{rnd.random():.2f}s" x="{x0+lx*P}" y="{y0+ly*P}" width="{P}" height="{P}" fill="{PX["red"]}"/>')
+        else:
+            s.add(f'<rect class="a win" style="animation-delay:-{rnd.random()*3:.1f}s" x="{x0+lx*P}" y="{y0+ly*P}" width="{P}" height="{P}" fill="{c}"/>')
+    # a drone crosses the skyline, rotors flickering, red light blinking
+    s.css.add(f"@keyframes fly{{from{{transform:translateX(0)}}to{{transform:translateX({W+60}px)}}}}"
+              f".fly{{animation:fly 16s steps({(W+60)//P}) infinite}}"
+              "@keyframes bob{0%,49%{transform:translateY(0)}50%,100%{transform:translateY(-5px)}}.bob{animation:bob 1.6s steps(1) infinite}"
+              "@keyframes rA{0%,49%{opacity:1}50%,100%{opacity:0}}@keyframes rB{0%,49%{opacity:0}50%,100%{opacity:1}}"
+              ".rA{animation:rA .2s steps(1) infinite}.rB{animation:rB .2s steps(1) infinite}")
+    dx, dy = x0 - 60, y0 + 3 * P
+    dmap = {"w": "grey", "-": "grey2", "g": "steel"}
+    s.add(f'<g class="a fly"><g class="a bob"><g class="a rA">{sprite_svg(DRONE[0], dmap, P, dx, dy)}</g>'
+          f'<g class="a rB">{sprite_svg(DRONE[1], dmap, P, dx, dy)}</g>'
+          f'<rect class="a blink" x="{dx+4*P}" y="{dy+4*P}" width="{P}" height="{P}" fill="{PX["red"]}"/></g></g>')
+    s.add("</g>")
+
+
+def batcave_scene(s, x0, y0, W, H, P=5):
+    gw, gh = W // P, H // P
+    p = Pix(gw, gh)
+    p.sky(["void", "night1", "night2", "night3", "night4"], 0, gh)
+    mx, my, mr = int(gw * 0.42), 15, 11
+
+    def moon(x, y):
+        t = ((x - mx) + (y - my)) / (2 * mr) + 0.5
+        c = mix(PX["red"], PX["red3"], max(0, min(1, t)))
+        if (x, y) in {(mx - 4, my - 2), (mx - 3, my - 2), (mx + 3, my + 4), (mx + 2, my + 5), (mx + 5, my - 4)}:
+            c = PX["red4"]
+        return c
+    disc(p, mx, my, mr, moon)
+    # cliff with a cave mouth on the right
+    rnd0 = np.random.default_rng(5)
+    for x in range(gw):
+        t = (x - gw * 0.58) / (gw * 0.42)
+        top = int(gh - 5 - max(0, t) ** 0.55 * (gh - 9) + (rnd0.integers(-1, 2) if t > 0.05 else 0)) if t > 0 else gh - 4
+        for y in range(top, gh):
+            p.set(x, y, "#18181c" if (x * 7 + y * 3) % 11 else "#1f1f24")
+        if t > 0:
+            p.set(x, top, PX["red3"])
+            p.set(x, top + 1, PX["red4"])
+    cx, cy = int(gw * 0.82), gh - 10
+    for y in range(cy - 7, gh - 3):
+        for x in range(cx - 9, cx + 10):
+            if ((x - cx) / 9.5) ** 2 + ((y - cy) / 7.5) ** 2 <= 1:
+                p.set(x, y, PX["black"])
+    for rx_ in (cx - 5, cx + 1):           # two server racks inside the cave
+        p.rect(rx_, cy - 4, 4, 10, PX["steel"])
+        p.rect(rx_ + 1, cy - 3, 2, 8, PX["grey3"])
+    p.rect(0, gh - 3, gw, 3, PX["ground"])
+    star_svg = stars(s, p, P, x0, y0, 40, gh - 12, seed=8)
+    p.fade(l=0.45, t=0.08, b=0.08, seed=9)
+    s.add(f'<g shape-rendering="crispEdges">{p.svg(P, x0, y0)}{star_svg}')
+    rnd = np.random.default_rng(2)
+    s.css.add("@keyframes blink{0%,49%{opacity:1}50%,100%{opacity:.1}}.blink{animation:blink 1.2s steps(1) infinite}")
+    for k, rx_ in enumerate((cx - 5, cx + 1)):   # rack LEDs, one column per rack
+        for j in range(4):
+            col = PX["red"] if (j + k) % 3 else PX["white"]
+            s.add(f'<rect class="a blink" style="animation-duration:{0.5+rnd.random()*1.5:.1f}s;animation-delay:-{rnd.random():.1f}s" '
+                  f'x="{x0+(rx_+1)*P}" y="{y0+(cy-3+j*2)*P}" width="{P}" height="{P}" fill="{col}"/>')
+    # bats leave the cave and cross the moon
+    s.css.add("@keyframes wA{0%,49%{opacity:1}50%,100%{opacity:0}}@keyframes wB{0%,49%{opacity:0}50%,100%{opacity:1}}"
+              ".wA{animation:wA .3s steps(1) infinite}.wB{animation:wB .3s steps(1) infinite}")
+    for i in range(4):
+        dur = 7 + i * 1.3
+        dx_, dy_ = -(gw * 0.8 + i * 6) * P, -(gh * 0.55 - i * 3) * P
+        s.css.add(f"@keyframes bat{i}{{0%{{transform:translate(0,0);opacity:0}}6%{{opacity:1}}"
+                  f"50%{{transform:translate({dx_*0.5:.0f}px,{dy_*0.8:.0f}px)}}"
+                  f"90%{{opacity:1}}100%{{transform:translate({dx_:.0f}px,{dy_:.0f}px);opacity:0}}}}"
+                  f".bat{i}{{animation:bat{i} {dur:.1f}s steps({int(dur*8)}) infinite -{i*1.9:.1f}s}}")
+        bx, by = x0 + (cx - 4) * P, y0 + (cy - 6) * P
+        bmap = {"b": "black"}
+        s.add(f'<g class="a bat{i}"><g class="a wA">{sprite_svg(BAT[0], bmap, P, bx, by)}</g>'
+              f'<g class="a wB">{sprite_svg(BAT[1], bmap, P, bx, by)}</g></g>')
+    s.add("</g>")
+
+
+SCENES = {"launch": launch_scene, "lidar": lidar_scene, "skyline": skyline_scene, "batcave": batcave_scene}
+
+
+import numpy as np
 
 # ---------------------------------------------------------------- ascii avatar scanner
 
@@ -405,7 +686,7 @@ def ascii_scanner(s, cfg, x, y, cols=48, rows=18):
     s.text(x + bw - 16, y + 22, "Live", "mono", 10, 500, fill=C["accent"], ls=1.4, anchor="end", upper=True)
     s.add(f'<circle class="a rec" cx="{x+bw-52}" cy="{y+18.5}" r="3" fill="{C["accent"]}"/>')
     ax, ay = x + 12, y + 34
-    colors = [(0.62, C["ink"]), (0.38, "#ffb9bb"), (0.0, "#b5404a")]
+    colors = [(0.62, C["ink"]), (0.38, "#ff8a94"), (0.0, "#a50d18")]
     s.used.add(("mono", 400, "normal"))
     glitch_rows = {int(rows * 0.3): 0, int(rows * 0.5): 1, int(rows * 0.7): 2}
     lines = []
@@ -434,7 +715,7 @@ def ascii_scanner(s, cfg, x, y, cols=48, rows=18):
     s.add(f'<g class="a scan" style="--h:{span}px">'
           f'<rect x="{ax-4}" y="{ay-10}" width="{cols*cw+8}" height="12" fill="{C["accent"]}" opacity="0.10"/>'
           f'<rect x="{ax-4}" y="{ay}" width="{cols*cw+8}" height="2" fill="{C["accent"]}" opacity="0.9" filter="url(#glow)"/>'
-          f'<rect x="{ax-4}" y="{ay}" width="{cols*cw+8}" height="1" fill="#ffe1e2"/></g>')
+          f'<rect x="{ax-4}" y="{ay}" width="{cols*cw+8}" height="1" fill="#ffd9dc"/></g>')
     s.text(x + 16, y + bh - 12, f"{cols} × {rows}  ·  {cfg['username']}", "mono", 10, fill=C["faint"], ls=1.2, upper=True)
     s.css.add(f"@keyframes rv{{from{{transform:scaleY(0)}}to{{transform:scaleY(1)}}}}"
               f".rv{{animation:rv 1.8s steps({rows}) both}}"
@@ -458,7 +739,7 @@ def hero(cfg):
     s.panel()
     s.defs.append(f'<clipPath id="panel"><rect x="1" y="1" width="{W-2}" height="{H-2}" rx="12"/></clipPath>')
     s.add('<g clip-path="url(#panel)">')
-    scene(s, "sky", h["scene"], 0, 0, W, 290, fade=(0.05, 0.05, 0.0, 0.36))
+    SCENES[h["scene"]](s, 0, 0, W, 290)
     s.add("</g>")
     ascii_scanner(s, cfg, 40, 250)
     x = 392
@@ -476,7 +757,7 @@ def hero(cfg):
 def strip(name, num, title, spec, H=110):
     W = 1000
     s = Svg(W, H, f"{num} · {title}")
-    scene(s, "st", spec, 0, 0, W, H, fade=(0.3, 0.1, 0.14, 0.14))
+    SCENES[spec](s, 0, 0, W, H)
     label = f"{num}  ·  {title.upper()}"
     lw = fnt("mono", 500).width(label, 12, 1.4)
     s.add(f'<rect x="16" y="{H/2-16}" width="{lw+32:.1f}" height="32" rx="6" fill="{C["panel"]}" stroke="{C["edge"]}"/>')
@@ -557,7 +838,7 @@ def fetch_calendar(login):
     return days
 
 
-CITY = ["#7a2530", "#b8323f", "#ff5a5f", "#ff8f6b", "#ffd27a"]
+CITY = ["#6a0a12", "#a50d18", "#e0101e", "#ff1f2d", "#f5f5f7"]
 
 
 def shade(hexc, f):
@@ -598,14 +879,14 @@ def city(cfg, days):
         tiles.append((d, P + g * U + g * V, P + (1 - g) * U + g * V, P + (1 - g) * (U + V), P + g * U + (1 - g) * V))
     # ground first, then traffic in the streets, then buildings back to front
     for d, a, b, c, e in tiles:
-        s.add(f'<polygon points="{pts([a, b, c, e])}" fill="#1e1517"/>')
+        s.add(f'<polygon points="{pts([a, b, c, e])}" fill="#161618"/>')
     s.defs.append('<filter id="hl" x="-200%" y="-200%" width="500%" height="500%"><feGaussianBlur stdDeviation="1.6"/></filter>')
     span = weeks * U
     for street in (1, 3, 5, 7):
         for j in range(2):
             P0 = O + street * V - U
             dur = 11 + rnd.random() * 8
-            col = "#ffd27a" if (street + j) % 2 else C["accent"]
+            col = "#f5f5f7" if (street + j) % 2 else C["accent"]
             s.add(f'<g class="a car" style="--dx:{span[0]+2*U[0]:.0f}px;--dy:{span[1]+2*U[1]:.0f}px;'
                   f'animation-duration:{dur:.1f}s;animation-delay:-{rnd.random()*dur:.1f}s">'
                   f'<circle cx="{P0[0]:.1f}" cy="{P0[1]:.1f}" r="3.2" fill="{col}" opacity="0.6" filter="url(#hl)"/>'
@@ -631,7 +912,7 @@ def city(cfg, days):
                     q = b + (c - b) * t + np.array([0, -wy])
                     tw = rnd.random() < 0.3
                     cls = f' class="a win" style="animation-delay:-{rnd.random()*3:.1f}s"' if tw else ""
-                    s.add(f'<rect{cls} x="{q[0]-1.2:.1f}" y="{q[1]-2:.1f}" width="2.4" height="3" fill="#ffe2b0" opacity="{0.8 if tw else 0.3}"/>')
+                    s.add(f'<rect{cls} x="{q[0]-1.2:.1f}" y="{q[1]-2:.1f}" width="2.4" height="3" fill="#ffd9dc" opacity="{0.8 if tw else 0.3}"/>')
         s.add("</g>")
     last = None
     for d in days:
@@ -654,7 +935,7 @@ def footer(cfg):
     s.panel(grid=False)
     s.defs.append(f'<clipPath id="panel"><rect x="1" y="1" width="{W-2}" height="{H-2}" rx="12"/></clipPath>')
     s.add('<g clip-path="url(#panel)">')
-    scene(s, "ft", f["scene"], 400, 0, 600, H, fade=(0.42, 0.0, 0.08, 0.08))
+    SCENES[f["scene"]](s, 400, 0, 600, H)
     s.add("</g>")
     s.text(48, 84, f["eyebrow"], "mono", 11, 500, fill=C["accent"], ls=1.8, upper=True)
     s.rich(48, 128, f["title"], 34, 500)

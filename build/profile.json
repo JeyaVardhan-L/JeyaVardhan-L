@@ -1,57 +1,69 @@
 {
   "name": "Lekkala Jeyavardhan",
   "username": "JeyaVardhan-L",
-
-  "avatar": { "image": "avatar.png", "crop": [46, 74, 194, 167], "label": "Scan_01 · avatar" },
-
+  "avatar": {
+    "image": "avatar.png",
+    "crop": [
+      46,
+      74,
+      194,
+      167
+    ],
+    "label": "Scan_01 · avatar"
+  },
   "hero": {
     "eyebrow": "Field notes  ·  India",
     "name_line": "Lekkala *Jeyavardhan*",
     "prompt": "$ now building ",
     "typing": ["a Unix shell in C", "a personal cloud server", "a rocket that steers itself", "a LiDAR odometry study"],
     "meta": "Systems  ·  Embedded  ·  Robotics",
-    "scene": {
-      "image": "harbour.jpg", "crop": [0, 0.22, 1, 0.92],
-      "motion": [["water", [0, 0.68, 1, 1]], ["leaves", [0, 0.22, 0.36, 0.5]], ["drift", [0.6, 0.22, 1, 0.5]]]
-    }
+    "scene": "launch"
   },
-
-  "strips": [
-    { "image": "hillside.jpg", "crop": [0, 0.5, 1, 0.8],  "motion": [["water", [0, 0.55, 0.8, 1]]] },
-    { "image": "tower.jpg",    "crop": [0, 0.45, 1, 0.78], "motion": [["drift", [0, 0.45, 0.58, 0.72]], ["leaves", [0.74, 0.55, 1, 0.9]]] }
-  ],
-
+  "strips": ["lidar", "skyline"],
   "projects": [
     {
       "name": "ForgeShell",
       "repo": "ForgeShell",
       "blurb": "A resource-aware Unix shell in C: pipelines, job control and live /proc process monitoring.",
-      "tags": [["C", "red"], ["Linux", "amber"]]
+      "tags": [["C", "red"], ["Linux", "steel"]]
     },
     {
       "name": "AutoNav",
       "repo": "Baseline_tests_for_AutoNav",
       "blurb": "A reproducible study: can LiDAR odometry keep up with a 10 Hz sensor's 100 ms deadline?",
-      "tags": [["Python", "coral"], ["LiDAR", "rose"]]
+      "tags": [["Python", "white"], ["LiDAR", "rose"]]
     }
   ],
-  "more": { "items": ["Batcave Cloud", "TVC Rocket", "Flight Telemetry", "Robo Soccerbot", "Drone Pathfinder"] },
-
+  "more": {
+    "items": ["Batcave Cloud", "TVC Rocket", "Flight Telemetry", "Robo Soccerbot", "Drone Pathfinder"]
+  },
   "stack": [
-    { "label": "Languages", "color": "red",   "items": ["C", "C++", "Python", "JavaScript", "TypeScript", "C#"] },
-    { "label": "Systems",   "color": "amber", "items": ["Linux", "System calls", "Git"] },
-    { "label": "Hardware",  "color": "coral", "items": ["STM32", "Sensor fusion", "LiDAR", "Robotics"] },
-    { "label": "Also",      "color": "rose",  "items": ["Unity", "AR / VR", "YOLO", "Astro"] }
+    {
+      "label": "Languages",
+      "color": "red",
+      "items": ["C", "C++", "Python", "JavaScript", "TypeScript", "C#"]
+    },
+    {
+      "label": "Systems",
+      "color": "white",
+      "items": ["Linux", "System calls", "Git"]
+    },
+    {
+      "label": "Hardware",
+      "color": "rose",
+      "items": ["STM32", "Sensor fusion", "LiDAR", "Robotics"]
+    },
+    {
+      "label": "Also",
+      "color": "steel",
+      "items": ["Unity", "AR / VR", "YOLO", "Astro"]
+    }
   ],
   "stack_note": "Taken from what is in my repos.",
-
   "footer": {
     "eyebrow": "Last stop",
     "title": "Thanks for *stopping by*.",
-    "text": "There is usually something new on the bench.",
-    "scene": {
-      "image": "tram.png", "crop": [0, 0.3, 1, 0.9],
-      "motion": [["water", [0, 0.38, 0.47, 0.64]], ["water", [0.47, 0.38, 1, 0.47]], ["drift", [0.25, 0.3, 0.85, 0.42]]]
-    }
+    "text": "Bats, servers and a cave. The Batcave Cloud is next on the bench.",
+    "scene": "batcave"
   }
 }
