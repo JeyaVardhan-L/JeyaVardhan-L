@@ -220,30 +220,32 @@ def divider(num, title):
 
 
 def stack(cfg):
-    W, x0, x1 = 1000, 190, 964
-    rows, y = [], 40
-    for g in cfg["stack"]:
-        chips, x, ry = [], x0, y
-        for it in g["items"]:
-            cw = fnt("mono").width(it, 13) + 40
-            if x + cw > x1:
-                x, ry = x0, ry + 42
-            chips.append((x, ry, cw, it))
-            x += cw + 10
-        rows.append((g, y, chips))
-        y = ry + 50
-    H = int(y + 34)
-    s = Svg(W, H, "Toolbox. " + ". ".join(f'{g["label"]}: {", ".join(g["items"])}' for g in cfg["stack"]))
+    """Four columns, one per group. Each item has a pixel LED; the LEDs light up in turn."""
+    W, pad = 1000, 36
+    groups = cfg["stack"]
+    cw = (W - 2 * pad) / len(groups)
+    rows = max(len(g["items"]) for g in groups)
+    top, step = 96, 32
+    H = int(top + rows * step + 12)
+    T = 0.45 * rows + 1.2
+    s = Svg(W, H, "Toolbox. " + ". ".join(f'{g["label"]}: {", ".join(g["items"])}' for g in groups))
     s.panel()
-    for g, gy, chips in rows:
+    s.css.add(f"@keyframes led{{0%,100%{{opacity:.22}}6%{{opacity:1}}22%{{opacity:.22}}}}.led{{opacity:.22;animation:led {T:.2f}s steps(4) infinite}}")
+    for i, g in enumerate(groups):
+        x = pad + i * cw
         col = C[g["color"]]
-        s.text(36, gy + 20, g["label"], "mono", 11, 500, fill=C["muted"], ls=1.4, upper=True)
-        for cx, cy, cw, it in chips:
-            s.add(f'<rect x="{cx}" y="{cy}" width="{cw:.1f}" height="30" rx="15" fill="{C["card"]}" stroke="{col}" stroke-opacity="0.75"/>')
-            s.add(f'<rect x="{cx+14}" y="{cy+12}" width="6" height="6" fill="{col}"/>')
-            s.text(cx + 28, cy + 20, it, "mono", 13, fill=C["ink"])
-    if cfg.get("stack_note"):
-        s.text(W - 36, H - 20, cfg["stack_note"], "serif", 14, style="italic", fill=C["muted"], anchor="end")
+        if i:
+            s.add(f'<line x1="{x:.1f}" x2="{x:.1f}" y1="28" y2="{H-28}" stroke="{C["edge"]}"/>')
+        ix = x + (0 if i == 0 else 24)
+        s.text(ix, 48, f"{i+1:02d}", "mono", 11, 500, fill=C["accent"], ls=1.2)
+        s.text(ix + 28, 48, g["label"], "mono", 11, 500, fill=C["ink2"], ls=1.6, upper=True)
+        s.add(f'<rect x="{ix}" y="64" width="{cw-48:.1f}" height="1" fill="{C["edge"]}"/>')
+        s.add(f'<rect x="{ix}" y="64" width="18" height="1" fill="{col}"/>')
+        for j, it in enumerate(g["items"]):
+            y = top + j * step
+            s.add(f'<rect x="{ix}" y="{y-9}" width="6" height="6" fill="{col}" opacity="0.22"/>')
+            s.add(f'<rect class="a led" style="animation-delay:{j*0.45 + i*0.12:.2f}s" x="{ix}" y="{y-9}" width="6" height="6" fill="{col}"/>')
+            s.text(ix + 18, y, it, "mono", 13.5, fill=C["ink"])
     s.save("stack.svg")
 
 
@@ -636,7 +638,7 @@ def batcave_scene(s, x0, y0, W, H, P=5):
         p.rect(rx_ + 1, cy - 3, 2, 8, PX["grey3"])
     p.rect(0, gh - 3, gw, 3, PX["ground"])
     star_svg = stars(s, p, P, x0, y0, 40, gh - 12, seed=8)
-    p.fade(l=0.45, t=0.08, b=0.08, seed=9)
+    p.fade(l=0.12, r=0.03, t=0.08, b=0.08, seed=9)
     s.add(f'<g shape-rendering="crispEdges">{p.svg(P, x0, y0)}{star_svg}')
     rnd = np.random.default_rng(2)
     s.css.add("@keyframes blink{0%,49%{opacity:1}50%,100%{opacity:.1}}.blink{animation:blink 1.2s steps(1) infinite}")
@@ -929,17 +931,14 @@ def city(cfg, days):
 # ---------------------------------------------------------------- footer + readme
 
 def footer(cfg):
-    f = cfg["footer"]
-    W, H = 1000, 200
-    s = Svg(W, H, f["title"].replace("*", ""))
+    """A wordless closing scene."""
+    W, H = 1000, 170
+    s = Svg(W, H, "The Batcave: bats fly out of a cave past a red moon, server lights blinking inside.")
     s.panel(grid=False)
     s.defs.append(f'<clipPath id="panel"><rect x="1" y="1" width="{W-2}" height="{H-2}" rx="12"/></clipPath>')
     s.add('<g clip-path="url(#panel)">')
-    SCENES[f["scene"]](s, 400, 0, 600, H)
+    SCENES[cfg["footer"]["scene"]](s, 0, 0, W, H)
     s.add("</g>")
-    s.text(48, 84, f["eyebrow"], "mono", 11, 500, fill=C["accent"], ls=1.8, upper=True)
-    s.rich(48, 128, f["title"], 34, 500)
-    s.text(48, 160, f["text"], "serif", 16, fill=C["ink2"])
     s.save("footer.svg")
 
 
@@ -969,7 +968,7 @@ def readme(cfg):
 
 <img src="assets/stack.svg" width="100%" alt="Toolbox: {escape(stack_alt)}">
 
-<img src="assets/footer.svg" width="100%" alt="{escape(cfg['footer']['title'].replace('*', ''))}">
+<img src="assets/footer.svg" width="100%" alt="The Batcave, in pixel art">
 """
 
 

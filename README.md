@@ -19,4 +19,4 @@
 
 <img src="assets/stack.svg" width="100%" alt="Toolbox: Languages: C, C++, Python, JavaScript, TypeScript, C#; Systems: Linux, System calls, Git; Hardware: STM32, Sensor fusion, LiDAR, Robotics; Also: Unity, AR / VR, YOLO, Astro">
 
-<img src="assets/footer.svg" width="100%" alt="Thanks for stopping by.">
+<img src="assets/footer.svg" width="100%" alt="The Batcave, in pixel art">

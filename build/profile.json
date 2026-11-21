@@ -3,12 +3,7 @@
   "username": "JeyaVardhan-L",
   "avatar": {
     "image": "avatar.png",
-    "crop": [
-      46,
-      74,
-      194,
-      167
-    ],
+    "crop": [46, 74, 194, 167],
     "label": "Scan_01 · avatar"
   },
   "hero": {
@@ -59,11 +54,7 @@
       "items": ["Unity", "AR / VR", "YOLO", "Astro"]
     }
   ],
-  "stack_note": "Taken from what is in my repos.",
   "footer": {
-    "eyebrow": "Last stop",
-    "title": "Thanks for *stopping by*.",
-    "text": "Bats, servers and a cave. The Batcave Cloud is next on the bench.",
     "scene": "batcave"
   }
 }
