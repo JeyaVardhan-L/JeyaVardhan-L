@@ -15,8 +15,4 @@
 
 <img src="assets/city.svg" width="100%" alt="Commit city: my contribution graph as an isometric city, one building per day, rebuilt daily">
 
-<img src="assets/divider-03.svg" width="100%" alt="03 · Toolbox">
-
-<img src="assets/stack.svg" width="100%" alt="Toolbox: Languages: C, C++, Python, JavaScript, TypeScript, C#; Systems: Linux, System calls, Git; Hardware: STM32, Sensor fusion, LiDAR, Robotics; Also: Unity, AR / VR, YOLO, Astro">
-
-<img src="assets/footer.svg" width="100%" alt="The Batcave, in pixel art">
+<img src="assets/stack.svg" width="100%" alt="Toolbox: Languages: C, C++, Python, C#; Robotics: ROS, STM32, Sensor fusion, LiDAR; Systems: Linux, System calls, Git; Also: Unity, AR / VR, YOLO">

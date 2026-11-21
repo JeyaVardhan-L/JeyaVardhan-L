@@ -14,7 +14,7 @@
     "meta": "Systems  ·  Embedded  ·  Robotics",
     "scene": "launch"
   },
-  "strips": ["lidar", "skyline"],
+  "strips": ["pcb", "skyline"],
   "projects": [
     {
       "name": "ForgeShell",
@@ -35,26 +35,19 @@
   "stack": [
     {
       "label": "Languages",
-      "color": "red",
-      "items": ["C", "C++", "Python", "JavaScript", "TypeScript", "C#"]
+      "items": ["C", "C++", "Python", "C#"]
+    },
+    {
+      "label": "Robotics",
+      "items": ["ROS", "STM32", "Sensor fusion", "LiDAR"]
     },
     {
       "label": "Systems",
-      "color": "white",
       "items": ["Linux", "System calls", "Git"]
     },
     {
-      "label": "Hardware",
-      "color": "rose",
-      "items": ["STM32", "Sensor fusion", "LiDAR", "Robotics"]
-    },
-    {
       "label": "Also",
-      "color": "steel",
-      "items": ["Unity", "AR / VR", "YOLO", "Astro"]
+      "items": ["Unity", "AR / VR", "YOLO"]
     }
-  ],
-  "footer": {
-    "scene": "batcave"
-  }
+  ]
 }

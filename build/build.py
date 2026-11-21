@@ -220,32 +220,17 @@ def divider(num, title):
 
 
 def stack(cfg):
-    """Four columns, one per group. Each item has a pixel LED; the LEDs light up in turn."""
-    W, pad = 1000, 36
+    """A small, quiet panel: what I use, without making a show of it."""
+    W, H = 1000, 112
     groups = cfg["stack"]
-    cw = (W - 2 * pad) / len(groups)
-    rows = max(len(g["items"]) for g in groups)
-    top, step = 96, 32
-    H = int(top + rows * step + 12)
-    T = 0.45 * rows + 1.2
     s = Svg(W, H, "Toolbox. " + ". ".join(f'{g["label"]}: {", ".join(g["items"])}' for g in groups))
-    s.panel()
-    s.css.add(f"@keyframes led{{0%,100%{{opacity:.22}}6%{{opacity:1}}22%{{opacity:.22}}}}.led{{opacity:.22;animation:led {T:.2f}s steps(4) infinite}}")
+    s.add(f'<rect x="0.5" y="0.5" width="{W-1}" height="{H-1}" rx="10" fill="{C["panel"]}" stroke="{C["edge"]}"/>')
+    s.text(28, 32, "Toolbox", "mono", 10, 500, fill=C["faint"], ls=1.6, upper=True)
     for i, g in enumerate(groups):
-        x = pad + i * cw
-        col = C[g["color"]]
-        if i:
-            s.add(f'<line x1="{x:.1f}" x2="{x:.1f}" y1="28" y2="{H-28}" stroke="{C["edge"]}"/>')
-        ix = x + (0 if i == 0 else 24)
-        s.text(ix, 48, f"{i+1:02d}", "mono", 11, 500, fill=C["accent"], ls=1.2)
-        s.text(ix + 28, 48, g["label"], "mono", 11, 500, fill=C["ink2"], ls=1.6, upper=True)
-        s.add(f'<rect x="{ix}" y="64" width="{cw-48:.1f}" height="1" fill="{C["edge"]}"/>')
-        s.add(f'<rect x="{ix}" y="64" width="18" height="1" fill="{col}"/>')
-        for j, it in enumerate(g["items"]):
-            y = top + j * step
-            s.add(f'<rect x="{ix}" y="{y-9}" width="6" height="6" fill="{col}" opacity="0.22"/>')
-            s.add(f'<rect class="a led" style="animation-delay:{j*0.45 + i*0.12:.2f}s" x="{ix}" y="{y-9}" width="6" height="6" fill="{col}"/>')
-            s.text(ix + 18, y, it, "mono", 13.5, fill=C["ink"])
+        x, y = 28 + (i % 2) * 486, 62 + (i // 2) * 28
+        s.add(f'<rect x="{x}" y="{y-7}" width="4" height="4" fill="{C["accent"]}" opacity="0.7"/>')
+        s.text(x + 14, y, g["label"], "mono", 10, 500, fill=C["muted"], ls=1.3, upper=True)
+        s.text(x + 120, y, "  ·  ".join(g["items"]), "mono", 12, fill=C["ink2"])
     s.save("stack.svg")
 
 
@@ -664,7 +649,72 @@ def batcave_scene(s, x0, y0, W, H, P=5):
     s.add("</g>")
 
 
-SCENES = {"launch": launch_scene, "lidar": lidar_scene, "skyline": skyline_scene, "batcave": batcave_scene}
+def pcb_scene(s, x0, y0, W, H, P=5):
+    """A circuit board: an STM32, an IMU and a radio, with signals running along the traces."""
+    gw, gh = W // P, H // P
+    p = Pix(gw, gh)
+    p.rect(0, 0, gw, gh, "#0e0e10")   # board: near-black with a few faint specks
+    rnd = np.random.default_rng(17)
+    for _ in range(60):
+        p.set(rnd.integers(0, gw), rnd.integers(0, gh), "#141417")
+    trace, pad = "#4a0a12", "#6a0a12"
+    paths = [
+        [(0, 4), (40, 4), (44, 8), (70, 8)],
+        [(0, 18), (50, 18), (54, 14), (70, 14)],
+        [(86, 9), (100, 9), (102, 11), (120, 11)],
+        [(86, 13), (110, 13), (114, 17), (156, 17), (162, 11)],
+        [(128, 10), (140, 10), (144, 6), (159, 6)],
+        [(167, 7), (199, 7)],
+        [(128, 13), (176, 13), (180, 17), (199, 17)],
+    ]
+
+    def cells(path):
+        out = []
+        for (ax, ay), (bx, by) in zip(path, path[1:]):
+            n = max(abs(bx - ax), abs(by - ay))
+            sx, sy = (bx > ax) - (bx < ax), (by > ay) - (by < ay)
+            out += [(ax + i * sx, ay + i * sy) for i in range(n)]
+        return out + [path[-1]]
+    for path in paths:
+        for (x, y) in cells(path):
+            p.set(x, y, trace)
+        for (x, y) in (path[0], path[-1]):
+            p.set(x, y, pad)
+    for i in range(6, 70, 9):      # vias
+        p.set(i, 11, pad)
+
+    def chip(x, y, w, h):
+        p.rect(x, y, w, h, "#1c1c21")
+        p.rect(x, y, w, 1, PX["steel"]); p.rect(x, y + h - 1, w, 1, PX["steel"])
+        for i in range(x + 1, x + w - 1, 2):
+            p.set(i, y - 1, PX["grey2"]); p.set(i, y + h, PX["grey2"])
+    chip(70, 5, 16, 12)
+    chip(120, 8, 8, 7)
+    chip(159, 4, 8, 6)
+    p.fade(l=0.25, r=0.06, t=0.12, b=0.12, seed=13)
+    s.add(f'<g shape-rendering="crispEdges">{p.svg(P, x0, y0)}')
+    for (cx, cy, txt) in ((78, 11.9, "STM32"), (124, 12.6, "IMU"), (163, 7.9, "RF")):
+        s.text(x0 + cx * P, y0 + cy * P, txt, "mono", 9 if len(txt) > 3 else 8, 500, fill=C["muted"], ls=1, anchor="middle")
+    # signals: each pulse steps along its trace one pixel at a time, with a short fading tail
+    for k, path in enumerate(paths):
+        cl = cells(path)
+        n = len(cl) - 1
+        dur = max(1.6, n * 0.045)
+        frames = []
+        for i, (x, y) in enumerate(cl):
+            frames.append(f"{100*i/n:.2f}%{{transform:translate({(x-cl[0][0])*P}px,{(y-cl[0][1])*P}px)}}")
+        s.css.add(f"@keyframes sig{k}{{{''.join(frames)}}}"
+                  f".sig{k}{{animation:sig{k} {dur:.2f}s steps(1) infinite}}")
+        for t, op in ((0, 1), (0.06, 0.5), (0.12, 0.22)):
+            s.add(f'<rect class="a sig{k}" style="animation-delay:-{(k*0.37 + t) % dur:.2f}s" '
+                  f'x="{x0+cl[0][0]*P}" y="{y0+cl[0][1]*P}" width="{P}" height="{P}" fill="{PX["red"]}" opacity="{op}"/>')
+    s.css.add("@keyframes blink{0%,49%{opacity:1}50%,100%{opacity:.1}}.blink{animation:blink 1.2s steps(1) infinite}")
+    s.add(f'<rect class="a blink" x="{x0+88*P}" y="{y0+4*P}" width="{P}" height="{P}" fill="{PX["red"]}"/>')
+    s.add(f'<rect x="{x0+90*P}" y="{y0+4*P}" width="{P}" height="{P}" fill="{PX["white"]}" opacity="0.8"/>')
+    s.add("</g>")
+
+
+SCENES = {"launch": launch_scene, "lidar": lidar_scene, "skyline": skyline_scene, "batcave": batcave_scene, "pcb": pcb_scene}
 
 
 import numpy as np
@@ -964,11 +1014,7 @@ def readme(cfg):
 
 <img src="assets/city.svg" width="100%" alt="Commit city: my contribution graph as an isometric city, one building per day, rebuilt daily">
 
-<img src="assets/divider-03.svg" width="100%" alt="03 · Toolbox">
-
 <img src="assets/stack.svg" width="100%" alt="Toolbox: {escape(stack_alt)}">
-
-<img src="assets/footer.svg" width="100%" alt="The Batcave, in pixel art">
 """
 
 
@@ -996,13 +1042,11 @@ def main():
     st = cfg["strips"]
     strip("strip-01.svg", "01", "Projects", st[0])
     strip("strip-02.svg", "02", "Commit city", st[1])
-    divider("03", "Toolbox")
     for i, p in enumerate(cfg["projects"], 1):
         project_card(cfg, p, i)
     more_row(cfg)
     city(cfg, fetch_calendar(cfg["username"]))
     stack(cfg)
-    footer(cfg)
     md = readme(cfg)
     with open(os.path.join(ROOT, "README.md"), "w", encoding="utf-8") as fh:
         fh.write(md)
