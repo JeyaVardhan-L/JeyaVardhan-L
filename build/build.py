@@ -19,12 +19,12 @@ ROOT = os.path.dirname(HERE)
 ASSETS = os.path.join(ROOT, "assets")
 
 C = {
-    # neutral near-black, clean greys, and a true red accent (hue 356, no orange in it)
-    "panel": "#0b0b0c", "card": "#121214", "edge": "#26262b",
-    "ink": "#f5f5f7", "ink2": "#bcbcc4", "muted": "#85858f", "faint": "#4c4c55",
-    "accent": "#ff1f2d", "accent2": "#ff5c66", "grid": "rgba(255,31,45,0.045)",
-    # tag colours: reds and neutrals only
-    "red": "#ff1f2d", "crimson": "#e0101e", "rose": "#ff5c66", "white": "#e9e9ee", "steel": "#9a9aa6",
+    # GitHub dark: the same canvas, borders, text greys and link blue as the page around it
+    "panel": "#0d1117", "card": "#161b22", "edge": "#30363d",
+    "ink": "#e6edf3", "ink2": "#b1bac4", "muted": "#9198a1", "faint": "#6e7681",
+    "accent": "#4493f8", "accent2": "#79c0ff", "grid": "rgba(68,147,248,0.045)",
+    # tag colours from GitHub's own palette
+    "blue": "#4493f8", "green": "#3fb950", "purple": "#a371f7", "orange": "#f0883e", "gray": "#9198a1",
 }
 
 FONT_FILES = {
@@ -206,11 +206,11 @@ def divider(num, title):
     left_end, right_start = W / 2 - lw / 2 - 20, W / 2 + lw / 2 + 20
     x = 2.0
     while x + 4 <= left_end:
-        s.add(f'<rect x="{x:.1f}" y="20" width="4" height="4" fill="#2a2a30"/>')
+        s.add(f'<rect x="{x:.1f}" y="20" width="4" height="4" fill="#30363d"/>')
         x += 9
     x = W - 6
     while x >= right_start:
-        s.add(f'<rect x="{x:.1f}" y="20" width="4" height="4" fill="#2a2a30"/>')
+        s.add(f'<rect x="{x:.1f}" y="20" width="4" height="4" fill="#30363d"/>')
         x -= 9
     s.used.add(("mono", 500, "normal"))
     s.add(f'<text x="500" y="26.5" class="m" font-size="12" font-weight="500" letter-spacing="1.4" '
@@ -259,12 +259,14 @@ import numpy as np
 
 BAYER = (np.array([[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]]) + 0.5) / 16
 
-PX = {   # the scene palette: neutral blacks and greys, true reds, a little white
-    "void": "#0b0b0c", "night1": "#0f0b0c", "night2": "#170a0c", "night3": "#22090d", "night4": "#33090f",
-    "glow": "#4d0a12", "hill1": "#1a0d0f", "hill2": "#111012", "ground": "#0d0d0f", "rim": "#6e0b15",
-    "red": "#ff1f2d", "red2": "#e0101e", "red3": "#a50d18", "red4": "#6a0a12",
-    "pink": "#ff8a94", "white": "#f5f5f7", "grey": "#9a9aa3", "grey2": "#55555d", "grey3": "#2c2c32",
-    "steel": "#3a3a42", "black": "#050506",
+PX = {   # the scene palette: GitHub dark greys, navy night sky, Primer blue, green and orange
+    "void": "#0d1117", "night1": "#0f1520", "night2": "#111b2b", "night3": "#132238", "night4": "#162a47",
+    "glow": "#1b3358", "hill1": "#111823", "hill2": "#0d131c", "ground": "#0b0f15", "rim": "#1a4a8c",
+    "blue": "#4493f8", "blue2": "#1f6feb", "blue3": "#163a6e", "sky": "#79c0ff", "purple": "#a371f7",
+    "green": "#3fb950", "green2": "#26a641", "green3": "#196c2e", "green4": "#0e4429",
+    "orange": "#f0883e", "orange2": "#bd561d", "yellow": "#d29922", "red": "#f85149",
+    "pink": "#79c0ff", "white": "#f0f6fc", "grey": "#9198a1", "grey2": "#484f58", "grey3": "#21262d",
+    "steel": "#30363d", "black": "#010409",
 }
 
 
@@ -407,8 +409,8 @@ FLAME = [
     [".rpppr.", ".rphpr.", "..rpr..", "..rd...", "..d...."],
     [".rpppr.", ".rphpr.", "..rpr..", "...dr..", "....d.."],
 ]
-FLAME_MAP = {"h": "white", "p": "pink", "r": "red", "d": "red3"}
-ROCKET_MAP = {"w": "white", "R": "red", "g": "grey", "s": "grey2"}
+FLAME_MAP = {"h": "white", "p": "yellow", "r": "orange", "d": "orange2"}
+ROCKET_MAP = {"w": "white", "R": "blue", "g": "grey", "s": "grey2"}
 
 BAT = [
     ["b.......b", "bb.....bb", ".bbb.bbb.", "..bbbbb..", "....b...."],
@@ -439,10 +441,10 @@ def launch_scene(s, x0, y0, W, H, P=5):
         if y > cy - 2 and (y - cy + 2) % 3 == 0:   # the stripes get closer near the horizon
             return None
         t = (y - (cy - r)) / (2 * r)
-        return mix(PX["red"], PX["red4"], max(0, min(1, t)) ** 1.2)
+        return mix(PX["sky"], PX["purple"], max(0, min(1, t)) ** 1.1)
     disc(p, cx, cy, r, sun)
     hills(p, ground - 4, 4, 0.045, 1.2, PX["hill1"], PX["rim"])
-    hills(p, ground + 1, 3, 0.08, 4.0, PX["hill2"], PX["red4"])
+    hills(p, ground + 1, 3, 0.08, 4.0, PX["hill2"], PX["blue3"])
     p.rect(0, ground + 2, gw, gh - ground - 2, PX["ground"])
     for y in range(ground + 2, gh):   # ground darkens into the page
         for x in range(gw):
@@ -529,10 +531,10 @@ def lidar_scene(s, x0, y0, W, H, P=5):
     for (x, y) in surface:
         if x < 34:
             continue
-        col = PX["red"] if (x + y) % 3 else PX["pink"]
+        col = PX["blue"] if (x + y) % 3 else PX["sky"]
         s.add(f'<rect class="a ping" style="animation-delay:{x/gw*T - T:.2f}s" x="{x0+x*P}" y="{y0+(y-1)*P}" '
               f'width="{P}" height="{P}" fill="{col}" opacity=".25"/>')
-    beam = "".join(f'<rect x="{x0}" y="{y0+j*P}" width="{P}" height="{P}" fill="{PX["red"]}" opacity="{0.15+0.6*j/gh:.2f}"/>' for j in range(gh - 4))
+    beam = "".join(f'<rect x="{x0}" y="{y0+j*P}" width="{P}" height="{P}" fill="{PX["blue"]}" opacity="{0.15+0.6*j/gh:.2f}"/>' for j in range(gh - 4))
     s.add(f'<g class="a sweep">{beam}</g>')
     rx = 40
     s.add(sprite_svg(ROVER, {"R": "red", "g": "grey", "o": "grey2"}, P, x0 + rx * P, y0 + (tops[rx + 4] - len(ROVER)) * P))
@@ -549,13 +551,13 @@ def skyline_scene(s, x0, y0, W, H, P=5):
     lights, x = [], 0
     while x < gw:
         bw, bh = int(rnd.integers(4, 10)), int(rnd.integers(5, gh - 3))
-        col = PX["hill2"] if rnd.random() < 0.5 else "#151518"
+        col = PX["hill2"] if rnd.random() < 0.5 else "#151b24"
         p.rect(x, gh - bh, bw, bh, col)
         for wy in range(gh - bh + 2, gh - 1, 2):
             for wx in range(x + 1, x + bw - 1, 2):
                 r = rnd.random()
                 if r < 0.30:
-                    c = PX["red3"] if r < 0.22 else (PX["white"] if r < 0.25 else PX["pink"])
+                    c = PX["yellow"] if r < 0.2 else (PX["white"] if r < 0.24 else PX["blue"])
                     if rnd.random() < 0.18:
                         lights.append((wx, wy, c))
                     else:
@@ -586,7 +588,7 @@ def skyline_scene(s, x0, y0, W, H, P=5):
     dmap = {"w": "grey", "-": "grey2", "g": "steel"}
     s.add(f'<g class="a fly"><g class="a bob"><g class="a rA">{sprite_svg(DRONE[0], dmap, P, dx, dy)}</g>'
           f'<g class="a rB">{sprite_svg(DRONE[1], dmap, P, dx, dy)}</g>'
-          f'<rect class="a blink" x="{dx+4*P}" y="{dy+4*P}" width="{P}" height="{P}" fill="{PX["red"]}"/></g></g>')
+          f'<rect class="a blink" x="{dx+4*P}" y="{dy+4*P}" width="{P}" height="{P}" fill="{PX["green"]}"/></g></g>')
     s.add("</g>")
 
 
@@ -598,9 +600,9 @@ def batcave_scene(s, x0, y0, W, H, P=5):
 
     def moon(x, y):
         t = ((x - mx) + (y - my)) / (2 * mr) + 0.5
-        c = mix(PX["red"], PX["red3"], max(0, min(1, t)))
+        c = mix(PX["white"], PX["grey"], max(0, min(1, t)))
         if (x, y) in {(mx - 4, my - 2), (mx - 3, my - 2), (mx + 3, my + 4), (mx + 2, my + 5), (mx + 5, my - 4)}:
-            c = PX["red4"]
+            c = PX["grey2"]
         return c
     disc(p, mx, my, mr, moon)
     # cliff with a cave mouth on the right
@@ -609,10 +611,10 @@ def batcave_scene(s, x0, y0, W, H, P=5):
         t = (x - gw * 0.58) / (gw * 0.42)
         top = int(gh - 5 - max(0, t) ** 0.55 * (gh - 9) + (rnd0.integers(-1, 2) if t > 0.05 else 0)) if t > 0 else gh - 4
         for y in range(top, gh):
-            p.set(x, y, "#18181c" if (x * 7 + y * 3) % 11 else "#1f1f24")
+            p.set(x, y, "#161b22" if (x * 7 + y * 3) % 11 else "#1c222b")
         if t > 0:
-            p.set(x, top, PX["red3"])
-            p.set(x, top + 1, PX["red4"])
+            p.set(x, top, PX["blue2"])
+            p.set(x, top + 1, PX["blue3"])
     cx, cy = int(gw * 0.82), gh - 10
     for y in range(cy - 7, gh - 3):
         for x in range(cx - 9, cx + 10):
@@ -629,7 +631,7 @@ def batcave_scene(s, x0, y0, W, H, P=5):
     s.css.add("@keyframes blink{0%,49%{opacity:1}50%,100%{opacity:.1}}.blink{animation:blink 1.2s steps(1) infinite}")
     for k, rx_ in enumerate((cx - 5, cx + 1)):   # rack LEDs, one column per rack
         for j in range(4):
-            col = PX["red"] if (j + k) % 3 else PX["white"]
+            col = PX["green"] if (j + k) % 3 else PX["white"]
             s.add(f'<rect class="a blink" style="animation-duration:{0.5+rnd.random()*1.5:.1f}s;animation-delay:-{rnd.random():.1f}s" '
                   f'x="{x0+(rx_+1)*P}" y="{y0+(cy-3+j*2)*P}" width="{P}" height="{P}" fill="{col}"/>')
     # bats leave the cave and cross the moon
@@ -653,11 +655,11 @@ def pcb_scene(s, x0, y0, W, H, P=5):
     """A circuit board: an STM32, an IMU and a radio, with signals running along the traces."""
     gw, gh = W // P, H // P
     p = Pix(gw, gh)
-    p.rect(0, 0, gw, gh, "#0e0e10")   # board: near-black with a few faint specks
+    p.rect(0, 0, gw, gh, "#0d1117")   # board: near-black with a few faint specks
     rnd = np.random.default_rng(17)
     for _ in range(60):
-        p.set(rnd.integers(0, gw), rnd.integers(0, gh), "#141417")
-    trace, pad = "#4a0a12", "#6a0a12"
+        p.set(rnd.integers(0, gw), rnd.integers(0, gh), "#131a23")
+    trace, pad = "#0e4429", "#196c2e"
     paths = [
         [(0, 4), (40, 4), (44, 8), (70, 8)],
         [(0, 18), (50, 18), (54, 14), (70, 14)],
@@ -684,7 +686,7 @@ def pcb_scene(s, x0, y0, W, H, P=5):
         p.set(i, 11, pad)
 
     def chip(x, y, w, h):
-        p.rect(x, y, w, h, "#1c1c21")
+        p.rect(x, y, w, h, "#161b22")
         p.rect(x, y, w, 1, PX["steel"]); p.rect(x, y + h - 1, w, 1, PX["steel"])
         for i in range(x + 1, x + w - 1, 2):
             p.set(i, y - 1, PX["grey2"]); p.set(i, y + h, PX["grey2"])
@@ -707,9 +709,9 @@ def pcb_scene(s, x0, y0, W, H, P=5):
                   f".sig{k}{{animation:sig{k} {dur:.2f}s steps(1) infinite}}")
         for t, op in ((0, 1), (0.06, 0.5), (0.12, 0.22)):
             s.add(f'<rect class="a sig{k}" style="animation-delay:-{(k*0.37 + t) % dur:.2f}s" '
-                  f'x="{x0+cl[0][0]*P}" y="{y0+cl[0][1]*P}" width="{P}" height="{P}" fill="{PX["red"]}" opacity="{op}"/>')
+                  f'x="{x0+cl[0][0]*P}" y="{y0+cl[0][1]*P}" width="{P}" height="{P}" fill="{PX["green"]}" opacity="{op}"/>')
     s.css.add("@keyframes blink{0%,49%{opacity:1}50%,100%{opacity:.1}}.blink{animation:blink 1.2s steps(1) infinite}")
-    s.add(f'<rect class="a blink" x="{x0+88*P}" y="{y0+4*P}" width="{P}" height="{P}" fill="{PX["red"]}"/>')
+    s.add(f'<rect class="a blink" x="{x0+88*P}" y="{y0+4*P}" width="{P}" height="{P}" fill="{PX["green"]}"/>')
     s.add(f'<rect x="{x0+90*P}" y="{y0+4*P}" width="{P}" height="{P}" fill="{PX["white"]}" opacity="0.8"/>')
     s.add("</g>")
 
@@ -738,7 +740,7 @@ def ascii_scanner(s, cfg, x, y, cols=48, rows=18):
     s.text(x + bw - 16, y + 22, "Live", "mono", 10, 500, fill=C["accent"], ls=1.4, anchor="end", upper=True)
     s.add(f'<circle class="a rec" cx="{x+bw-52}" cy="{y+18.5}" r="3" fill="{C["accent"]}"/>')
     ax, ay = x + 12, y + 34
-    colors = [(0.62, C["ink"]), (0.38, "#ff8a94"), (0.0, "#a50d18")]
+    colors = [(0.62, C["ink"]), (0.38, "#79c0ff"), (0.0, "#1f6feb")]
     s.used.add(("mono", 400, "normal"))
     glitch_rows = {int(rows * 0.3): 0, int(rows * 0.5): 1, int(rows * 0.7): 2}
     lines = []
@@ -767,7 +769,7 @@ def ascii_scanner(s, cfg, x, y, cols=48, rows=18):
     s.add(f'<g class="a scan" style="--h:{span}px">'
           f'<rect x="{ax-4}" y="{ay-10}" width="{cols*cw+8}" height="12" fill="{C["accent"]}" opacity="0.10"/>'
           f'<rect x="{ax-4}" y="{ay}" width="{cols*cw+8}" height="2" fill="{C["accent"]}" opacity="0.9" filter="url(#glow)"/>'
-          f'<rect x="{ax-4}" y="{ay}" width="{cols*cw+8}" height="1" fill="#ffd9dc"/></g>')
+          f'<rect x="{ax-4}" y="{ay}" width="{cols*cw+8}" height="1" fill="#cae8ff"/></g>')
     s.text(x + 16, y + bh - 12, f"{cols} × {rows}  ·  {cfg['username']}", "mono", 10, fill=C["faint"], ls=1.2, upper=True)
     s.css.add(f"@keyframes rv{{from{{transform:scaleY(0)}}to{{transform:scaleY(1)}}}}"
               f".rv{{animation:rv 1.8s steps({rows}) both}}"
@@ -890,7 +892,7 @@ def fetch_calendar(login):
     return days
 
 
-CITY = ["#6a0a12", "#a50d18", "#e0101e", "#ff1f2d", "#f5f5f7"]
+CITY = ["#0e4429", "#006d32", "#26a641", "#39d353", "#aff5b4"]
 
 
 def shade(hexc, f):
@@ -931,14 +933,14 @@ def city(cfg, days):
         tiles.append((d, P + g * U + g * V, P + (1 - g) * U + g * V, P + (1 - g) * (U + V), P + g * U + (1 - g) * V))
     # ground first, then traffic in the streets, then buildings back to front
     for d, a, b, c, e in tiles:
-        s.add(f'<polygon points="{pts([a, b, c, e])}" fill="#161618"/>')
+        s.add(f'<polygon points="{pts([a, b, c, e])}" fill="#161b22"/>')
     s.defs.append('<filter id="hl" x="-200%" y="-200%" width="500%" height="500%"><feGaussianBlur stdDeviation="1.6"/></filter>')
     span = weeks * U
     for street in (1, 3, 5, 7):
         for j in range(2):
             P0 = O + street * V - U
             dur = 11 + rnd.random() * 8
-            col = "#f5f5f7" if (street + j) % 2 else C["accent"]
+            col = "#f0f6fc" if (street + j) % 2 else C["accent"]
             s.add(f'<g class="a car" style="--dx:{span[0]+2*U[0]:.0f}px;--dy:{span[1]+2*U[1]:.0f}px;'
                   f'animation-duration:{dur:.1f}s;animation-delay:-{rnd.random()*dur:.1f}s">'
                   f'<circle cx="{P0[0]:.1f}" cy="{P0[1]:.1f}" r="3.2" fill="{col}" opacity="0.6" filter="url(#hl)"/>'
@@ -964,7 +966,7 @@ def city(cfg, days):
                     q = b + (c - b) * t + np.array([0, -wy])
                     tw = rnd.random() < 0.3
                     cls = f' class="a win" style="animation-delay:-{rnd.random()*3:.1f}s"' if tw else ""
-                    s.add(f'<rect{cls} x="{q[0]-1.2:.1f}" y="{q[1]-2:.1f}" width="2.4" height="3" fill="#ffd9dc" opacity="{0.8 if tw else 0.3}"/>')
+                    s.add(f'<rect{cls} x="{q[0]-1.2:.1f}" y="{q[1]-2:.1f}" width="2.4" height="3" fill="#d2f8d2" opacity="{0.8 if tw else 0.3}"/>')
         s.add("</g>")
     last = None
     for d in days:

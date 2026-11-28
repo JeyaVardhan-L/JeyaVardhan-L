@@ -20,13 +20,13 @@
       "name": "ForgeShell",
       "repo": "ForgeShell",
       "blurb": "A resource-aware Unix shell in C: pipelines, job control and live /proc process monitoring.",
-      "tags": [["C", "red"], ["Linux", "steel"]]
+      "tags": [["C", "blue"], ["Linux", "gray"]]
     },
     {
       "name": "AutoNav",
       "repo": "Baseline_tests_for_AutoNav",
       "blurb": "A reproducible study: can LiDAR odometry keep up with a 10 Hz sensor's 100 ms deadline?",
-      "tags": [["Python", "white"], ["LiDAR", "rose"]]
+      "tags": [["Python", "green"], ["LiDAR", "purple"]]
     }
   ],
   "more": {

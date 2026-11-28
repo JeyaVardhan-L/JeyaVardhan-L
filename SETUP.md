@@ -18,7 +18,7 @@ Never edit `README.md` or `assets/` by hand. The build rewrites them.
 - **Avatar:** `avatar.png` is your GitHub picture. `crop` (in pixels) picks the part that becomes ASCII art.
 - **Commit city:** built from your public contribution calendar. A GitHub Action rebuilds it every day, and whenever `build/` changes. You can also run it from the Actions tab ("Rebuild commit city").
 - **Toolbox:** a small panel at the very end. Edit `stack` (four groups, each a label and a list). Keep it to things you can talk about.
-- **Colours:** the `C` table at the top of `build/build.py`. Tag colours are `red`, `crimson`, `rose`, `white` and `steel`.
+- **Colours:** the `C` table at the top of `build/build.py`. Tag colours are `blue`, `green`, `purple`, `orange` and `gray`, taken from GitHub's own palette.
 
 To preview locally, run `python -m http.server` in this folder and open `http://localhost:8000/build/preview.html`.
 
